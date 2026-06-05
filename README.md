@@ -90,6 +90,16 @@ VCD flavours:
 A small in-process cache avoids re-parsing VCD headers when the same file
 is read by multiple analysers in a single test run.
 
+## Probe-map audit
+
+The channel-to-pin labels in every test's `clip` step have been audited
+against the AA2/1 IC pinout in `~/wiki/projects/marconi-2019a/aa2-1-ic-inventory.md`.
+See `~/wiki/projects/marconi-2019a/probe-map-audit.md` for the row-by-row
+audit. **Before the first bench session, re-verify every ❓ row in the
+audit against page-014 Fig. 3 of the service manual** — the A/B/C
+address-line ↔ IC11 Y0–Y7 mapping is not documented in the wiki and is
+the one piece of probe-map data that still needs human confirmation.
+
 ## Repository
 
 This project is git-version-controlled. See `.gitignore` for the runtime

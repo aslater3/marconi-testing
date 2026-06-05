@@ -228,7 +228,11 @@ CONTENTION = TestDef(
             "  - CH1 on any chip-select (e.g. AD4 IC1 Pin 15, /Y0 output of 74LS138)\n"
             "  - CH2-CH7 on other 74LS138 Y-outputs or 74LS273 outputs\n"
             "  - All GND clips on AA2/1 GND\n\n"
-            "Press ENTER to begin a 5-second capture."
+            "When the capture starts, you have 5 seconds to provoke the fault. Do this:\n"
+            "  1) Press a few different front-panel keys (e.g. STEP UP, STEP DOWN, RANGE, MODULATION)\n"
+            "  2) Watch the LA activity LEDs (if any)\n"
+            "  3) Try to provoke the fault — toggle a 1 dB step a few times\n\n"
+            "Read the instructions above, then press ENTER to begin the 5-second capture."
         ), "wait_for": "enter"},
 
         {"type": "capture", "id": "cap_contention", "duration_s": 5.0,
@@ -236,11 +240,7 @@ CONTENTION = TestDef(
          "trigger": None},
 
         {"type": "prompt", "id": "press_buttons", "text": (
-            "During the 5 seconds of capture, do the following:\n"
-            "  1) Press a few different front-panel keys (e.g. STEP UP, STEP DOWN, RANGE, MODULATION)\n"
-            "  2) Watch the LA activity LEDs (if any)\n"
-            "  3) Try to provoke the fault — toggle a 1 dB step a few times\n\n"
-            "The LA captured everything. Press ENTER to analyse."
+            "The LA captured 5 seconds of activity. Press ENTER to analyse."
         ), "wait_for": "enter"},
 
         {"type": "analyse", "id": "ana_contention", "kind": "contention",
