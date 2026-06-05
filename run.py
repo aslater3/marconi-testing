@@ -10,7 +10,9 @@ Usage:
 """
 from __future__ import annotations
 import argparse
+import queue
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -74,12 +76,8 @@ def _execute_step(step: dict, step_num: int, total: int, report: Report,
         print(f"  {ui.DIM}duration: {duration_s}s  rate: {sample_rate_hz:,} Hz  "
               f"channels: {channels}  mode: {mode}{ui.RESET}")
         print()
-        if mode != "dry_run":
-            ui.countdown_progress(duration_s, prefix="Capturing")
-        else:
-            ui.info("dry-run: skipping capture")
-
-        try:
+        if mode in ("dry_run", "simulate"):
+            ui.info(f"{mode}: skipping live dashboard")
             cap = do_capture(step, CAPTURES_DIR, mode=mode)
             captures[cap.name] = cap
             report.add_capture(cap.to_dict())
@@ -87,6 +85,70 @@ def _execute_step(step: dict, step_num: int, total: int, report: Report,
                              duration_s=cap.duration_s, sample_rate_hz=cap.sample_rate_hz,
                              n_samples=cap.n_samples, vcd_path=str(cap.vcd_path) if cap.vcd_path else None)
             ui.success(f"captured {cap.n_samples:,} samples to {cap.vcd_path or 'stub'}")
+            return
+
+        # Probe labels for the live dashboard. Best-effort: pull from any
+        # preceding "clip" step's probe map if we have one in the test, else
+        # fall back to "D<n>". (We don't currently track prior steps, so we
+        # use generic names — the test author can pass them in via a future
+        # 'probes' field on the capture step.)
+        probes = step.get("probes", {ch: f"D{ch}" for ch in channels})
+
+        # In-memory capture path: stream sigrok's stdout into a LiveBuffer
+        # instead of writing to a file during capture. capture.py dumps the
+        # buffer to disk in one shot after sigrok exits, so the post-capture
+        # analyser still has a file to read. The advantage is no disk I/O
+        # competing with the USB bus while the LA is streaming — relevant on
+        # macOS where fx2lafw is sensitive to I/O back-pressure.
+        live_buffer = ui.LiveBuffer()
+        dashboard_result: "queue.Queue[dict]" = queue.Queue()
+        dashboard_exc: "queue.Queue[BaseException]" = queue.Queue()
+
+        def _dashboard_worker(_vcd_path_unused, should_stop):
+            try:
+                result = ui.live_capture_progress(
+                    duration_s, probes=probes,
+                    should_stop=should_stop,
+                    live_buffer=live_buffer,
+                )
+                dashboard_result.put(result)
+            except BaseException as e:  # noqa: BLE001
+                dashboard_exc.put(e)
+
+        def _on_progress(vcd_path, should_stop):
+            t = threading.Thread(
+                target=_dashboard_worker, args=(vcd_path, should_stop),
+                daemon=True, name="live-dashboard",
+            )
+            t.start()
+
+        try:
+            cap = do_capture(step, CAPTURES_DIR, mode=mode,
+                             on_progress=_on_progress,
+                             live_buffer=live_buffer)
+            captures[cap.name] = cap
+            report.add_capture(cap.to_dict())
+            report.add_event(step_id, "capture", capture_id=cap.name, mode=cap.mode,
+                             duration_s=cap.duration_s, sample_rate_hz=cap.sample_rate_hz,
+                             n_samples=cap.n_samples, vcd_path=str(cap.vcd_path) if cap.vcd_path else None)
+            ui.success(f"captured {cap.n_samples:,} samples to {cap.vcd_path or 'stub'}")
+            # Surface what the dashboard saw, in case the operator missed it
+            try:
+                res = dashboard_result.get_nowait()
+                edges = sum(res.get("rising", {}).values()) + sum(res.get("falling", {}).values())
+                if edges:
+                    ui.info(f"live view: {edges} edges observed during capture "
+                            f"({dict(res.get('rising', {}))} rising, "
+                            f"{dict(res.get('falling', {}))} falling)")
+                else:
+                    ui.info("live view: no edges observed during capture")
+            except queue.Empty:
+                pass
+            try:
+                exc = dashboard_exc.get_nowait()
+                ui.warn(f"live dashboard error: {exc!r}")
+            except queue.Empty:
+                pass
         except Exception as e:
             ui.error(f"capture failed: {e}")
             report.add_event(step_id, "capture_error", error=str(e))

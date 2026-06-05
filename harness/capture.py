@@ -14,10 +14,12 @@ import os
 import random
 import shutil
 import subprocess
+import sys
+import threading
 import time
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
-from typing import Optional
+from typing import Any, Callable, Optional
 
 
 @dataclass
@@ -384,11 +386,33 @@ def _synthesise_vcd(channels: list[int], n_samples: int, sample_rate_hz: int,
 # Public API
 # -----------------------------------------------------------------------------
 
-def capture(step: dict, out_dir: Path, mode: str = "auto") -> Capture:
+def capture(step: dict, out_dir: Path, mode: str = "auto",
+            on_progress: Optional[Callable[[Path, Callable[[], bool]], Any]] = None,
+            live_buffer: Optional[Any] = None
+            ) -> Capture:
     """Run a capture step.
 
     mode: 'hardware' | 'dry_run' | 'simulate' | 'auto'
           'auto' picks hardware if available, else simulate
+
+    on_progress: optional callable for hardware mode, signature
+                 on_progress(vcd_path: Path, should_stop: Callable[[], bool]) -> None
+                 Called once, just after the sigrok subprocess has been started
+                 and is writing the VCD to vcd_path. The callable is expected
+                 to return quickly after launching any background UI (e.g. a
+                 live dashboard thread) and may use should_stop() to poll
+                 whether the capture subprocess has finished. Only invoked in
+                 'hardware' mode; other modes ignore it.
+
+    live_buffer: optional thread-safe byte sink (anything with a
+                 .write(bytes) method and a .read_since(offset) -> (bytes, new_offset)
+                 method — see harness.ui.LiveBuffer). When provided AND mode is
+                 'hardware', the VCD is streamed from sigrok's stdout directly
+                 into the buffer (no disk I/O during capture). Once the
+                 subprocess exits, the buffer's contents are written to vcd_path
+                 in a single shot so the post-capture analyser still has a file.
+                 When None, falls back to the legacy file-based capture where
+                 sigrok writes directly to vcd_path.
     """
     out_dir.mkdir(parents=True, exist_ok=True)
     name = step.get("id", "capture")
@@ -422,16 +446,85 @@ def capture(step: dict, out_dir: Path, mode: str = "auto") -> Capture:
             time_spec = f"{int(duration_s)}s"
         else:
             time_spec = f"{int(round(duration_s * 1000))}ms"
-        # sigrok-cli writes the chosen output format to the file given by
-        # -o. The "vcd=filename=..." form is NOT supported; that's a PulseView
-        # export extension. The VCD goes to the output file directly.
+        # Build the sigrok-cli command. Two flavours:
+        #   - With live_buffer:    stdout=PIPE  → reader thread → buffer
+        #   - Without live_buffer: -o <file>    → sigrok writes directly
+        # The in-memory path is preferred for hardware runs because it avoids
+        # disk I/O competing with the USB bulk-transfer endpoint for the LA,
+        # which on macOS can cause sigrok to stall or the device to drop off.
+        use_pipe = (live_buffer is not None)
         cmd = [sr, "-d", "fx2lafw", "-C", ch_spec,
                "-c", f"samplerate={sample_rate_hz}",
                "--time", time_spec,
-               "-O", "vcd",
-               "-o", str(vcd_path)]
+               "-O", "vcd"]
+        if not use_pipe:
+            # sigrok writes the chosen output format to the file given by
+            # -o. The "vcd=filename=..." form is NOT supported; that's a
+            # PulseView export extension. The VCD goes to the output file
+            # directly.
+            cmd += ["-o", str(vcd_path)]
         # TODO: trigger handling is more complex in sigrok-cli; for now, no trigger
-        subprocess.run(cmd, check=True, timeout=duration_s + 10)
+
+        if use_pipe:
+            proc = subprocess.Popen(cmd,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE)
+        else:
+            proc = subprocess.Popen(cmd,
+                                    stdout=subprocess.DEVNULL,
+                                    stderr=subprocess.PIPE)
+
+        # Reader thread: pumps sigrok's stdout into live_buffer.
+        # Always run it (even if use_pipe is False) so a future change can
+        # consume the pipe without restructuring the wait logic.
+        pump_done = threading.Event()
+
+        def _pump_stdout():
+            try:
+                assert proc.stdout is not None
+                stdout_buf = proc.stdout  # type: ignore[assignment]
+                while True:
+                    # read1 returns up to N bytes without blocking for more
+                    # (vs read(N) which blocks until N bytes or EOF)
+                    chunk = stdout_buf.read1(65536)  # type: ignore[attr-defined]
+                    if not chunk:
+                        break
+                    if live_buffer is not None:
+                        live_buffer.write(chunk)
+            except Exception as e:  # noqa: BLE001
+                print(f"warning: stdout pump raised {e!r}", file=sys.stderr)
+            finally:
+                pump_done.set()
+
+        pump_thread = threading.Thread(target=_pump_stdout, daemon=True,
+                                       name="vcd-pump")
+        pump_thread.start()
+
+        if on_progress is not None:
+            try:
+                on_progress(vcd_path, lambda: proc.poll() is not None)
+            except Exception as e:  # noqa: BLE001 — never let a UI hook kill a capture
+                print(f"warning: on_progress hook raised {e!r}", file=sys.stderr)
+        try:
+            proc.wait(timeout=duration_s + 10)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.wait()
+            pump_done.wait(timeout=2)
+            raise RuntimeError(f"sigrok-cli timed out after {duration_s + 10}s")
+        # sigrok has exited; let the reader drain any remaining bytes
+        pump_thread.join(timeout=2)
+        if proc.returncode != 0:
+            stderr = (proc.stderr.read() if proc.stderr else b"").decode("utf-8",
+                                                                          errors="replace")
+            raise RuntimeError(
+                f"sigrok-cli exited with status {proc.returncode}: {stderr.strip()}"
+            )
+
+        # Flush the in-memory buffer to disk (single write — no streaming I/O)
+        if use_pipe and live_buffer is not None:
+            data, _ = live_buffer.read_since(0)
+            vcd_path.write_bytes(data)
 
         # Also save raw (sigrok-cli can do -O raw too, but VCD is more portable)
         raw_path.write_bytes(b"")  # placeholder; raw is optional
