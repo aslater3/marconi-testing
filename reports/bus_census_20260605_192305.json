@@ -1,0 +1,352 @@
+{
+  "schema_version": 1,
+  "test": "bus_census",
+  "test_description": "Per-channel health check on the AA2/1 address bus. For each recipient board, isolate the bus, capture, and compare to baseline. Identifies stuck-at, high-impedance, and contention lines.",
+  "operator": "andy",
+  "hostname": "andys-MacBook-Pro.local",
+  "started_at": "2026-06-05T18:22:25+00:00",
+  "finished_at": "2026-06-05T18:23:05+00:00",
+  "hardware": "simulate",
+  "captures": {
+    "cap_baseline_idle": {
+      "name": "cap_baseline_idle",
+      "sample_rate_hz": 1000000,
+      "n_samples": 1000,
+      "duration_s": 2.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": null,
+      "raw_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_baseline_idle_20260605_192238.raw",
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_baseline_idle_20260605_192238.vcd",
+      "captured_at": "20260605_192238",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=clean_strobe, scaled to 1000 samples for speed"
+    },
+    "cap_baseline_active": {
+      "name": "cap_baseline_active",
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "duration_s": 2.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 7,
+        "edge": "rising"
+      },
+      "raw_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_baseline_active_20260605_192249.raw",
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_baseline_active_20260605_192249.vcd",
+      "captured_at": "20260605_192249",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=clean_strobe, scaled to 1000 samples for speed"
+    },
+    "cap_with_ac13": {
+      "name": "cap_with_ac13",
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "duration_s": 2.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 7,
+        "edge": "rising"
+      },
+      "raw_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_with_ac13_20260605_192258.raw",
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_with_ac13_20260605_192258.vcd",
+      "captured_at": "20260605_192258",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=clean_strobe, scaled to 1000 samples for speed"
+    }
+  },
+  "events": [
+    {
+      "t": "2026-06-05T18:22:32+00:00",
+      "step_id": "clip_baseline",
+      "type": "clip",
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "probes": {
+        "0": "AA2/1 IC11.Pin18  (bus 'C' address line, the suspect)",
+        "1": "AA2/1 IC11.Pin16  (bus 'B' address line)",
+        "2": "AA2/1 IC11.Pin14  (bus 'A' address line)",
+        "3": "AA2/1 IC11.Pin12  (bus D0 data line)",
+        "4": "AA2/1 IC11.Pin9   (bus D1 data line)",
+        "5": "AA2/1 IC11.Pin7   (bus D2 data line)",
+        "6": "AA2/1 IC11.Pin5   (bus D3 data line)",
+        "7": "AA2/1 connector.Pin (any strobe/CS, e.g. AA2 LB strobe)"
+      },
+      "text": "Clip the 8 LA channels to the address bus on AA2/1:"
+    },
+    {
+      "t": "2026-06-05T18:22:38+00:00",
+      "step_id": "cap_baseline_idle",
+      "type": "capture",
+      "capture_id": "cap_baseline_idle",
+      "mode": "simulate",
+      "duration_s": 2.0,
+      "sample_rate_hz": 1000000,
+      "n_samples": 1000,
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_baseline_idle_20260605_192238.vcd"
+    },
+    {
+      "t": "2026-06-05T18:22:49+00:00",
+      "step_id": "cap_baseline_active",
+      "type": "capture",
+      "capture_id": "cap_baseline_active",
+      "mode": "simulate",
+      "duration_s": 2.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_baseline_active_20260605_192249.vcd"
+    },
+    {
+      "t": "2026-06-05T18:22:49+00:00",
+      "step_id": "ana_baseline",
+      "type": "analysis",
+      "kind": "bus_census",
+      "params": {
+        "reference": "self",
+        "expect_quiescent": "cap_baseline_idle"
+      },
+      "result": {
+        "kind": "bus_census",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 1,
+            "n_rising": 1,
+            "n_falling": 0,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": "low activity (1 edge in 2.0s)",
+            "edge_ratio_vs_ref": 1.0
+          }
+        }
+      }
+    },
+    {
+      "t": "2026-06-05T18:22:58+00:00",
+      "step_id": "cap_with_ac13",
+      "type": "capture",
+      "capture_id": "cap_with_ac13",
+      "mode": "simulate",
+      "duration_s": 2.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_with_ac13_20260605_192258.vcd"
+    },
+    {
+      "t": "2026-06-05T18:22:58+00:00",
+      "step_id": "ana_with_ac13",
+      "type": "analysis",
+      "kind": "bus_census",
+      "params": {
+        "reference": "cap_baseline_active"
+      },
+      "result": {
+        "kind": "bus_census",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 1,
+            "n_rising": 1,
+            "n_falling": 0,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": "",
+            "edge_ratio_vs_ref": 1.0
+          }
+        }
+      }
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {}
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "test": "contention_detector",
+  "test_description": "Focus capture on the 'C' address line and look for transitions that occur OUTSIDE expected windows \u2014 these are the smoking gun for two chips driving the same line in opposite directions.",
+  "operator": "andy",
+  "hostname": "andys-MacBook-Pro.local",
+  "started_at": "2026-06-05T19:01:12+00:00",
+  "finished_at": "2026-06-05T19:06:21+00:00",
+  "hardware": "fx2lafw 24MHz 8ch",
+  "captures": {},
+  "events": [
+    {
+      "t": "2026-06-05T19:06:08+00:00",
+      "step_id": "cap_contention",
+      "type": "capture_error",
+      "error": "Command '['/opt/homebrew/bin/sigrok-cli', '-d', 'fx2lafw', '-C', 'D0,D1,D2,D3,D4,D5,D6,D7', '-c', 'samplerate=24000000', '--time', '5s', '-O', 'vcd', '-o', '/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_contention_20260605_200607.vcd']' returned non-zero exit status 1."
+    },
+    {
+      "t": "2026-06-05T19:06:14+00:00",
+      "step_id": "ana_contention",
+      "type": "analysis_error",
+      "kind": "contention",
+      "error": "list index out of range"
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {}
+}

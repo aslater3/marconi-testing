@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "test": "contention_detector",
+  "test_description": "Focus capture on the 'C' address line and look for transitions that occur OUTSIDE expected windows \u2014 these are the smoking gun for two chips driving the same line in opposite directions.",
+  "operator": "andy",
+  "hostname": "andys-MacBook-Pro.local",
+  "started_at": "2026-06-05T18:41:57+00:00",
+  "finished_at": "2026-06-05T18:42:17+00:00",
+  "hardware": "fx2lafw 24MHz 8ch",
+  "captures": {
+    "cap_contention": {
+      "name": "cap_contention",
+      "sample_rate_hz": 24000000,
+      "n_samples": 120000000,
+      "duration_s": 5.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": null,
+      "raw_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_contention_20260605_194207.raw",
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_contention_20260605_194207.vcd",
+      "captured_at": "20260605_194207",
+      "mode": "hardware",
+      "notes": "captured via sigrok-cli fx2lafw (Saleae Logic 8ch/24MHz)"
+    }
+  },
+  "events": [
+    {
+      "t": "2026-06-05T18:42:12+00:00",
+      "step_id": "cap_contention",
+      "type": "capture",
+      "capture_id": "cap_contention",
+      "mode": "hardware",
+      "duration_s": 5.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 120000000,
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_contention_20260605_194207.vcd"
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {}
+}
