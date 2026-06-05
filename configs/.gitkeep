@@ -1,0 +1,5 @@
+# Future per-test config / threshold overrides go here.
+# Each file is a JSON or YAML with per-test params that override
+# the defaults in harness/tests.py.
+# Example: bus_e2e_cpu_to_ac4.yaml might override expected_tp2_v
+# or tp2_tolerance_pct for a specific instrument.

@@ -1,0 +1,7 @@
+# Saved/recorded LA captures for repeatable regression testing.
+# The current schema is VCD (Value Change Dump) emitted by sigrok-cli.
+# Files in this directory are NOT tracked by git — see .gitignore.
+# To add a regression capture:
+#   1. Capture from a known-good 2019A
+#   2. Save the VCD with a descriptive name (e.g. stage1_known_good_20260615.vcd)
+#   3. Add a regression test in harness/tests.py that loads this file
