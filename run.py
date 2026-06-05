@@ -22,7 +22,7 @@ from harness.capture import capture as do_capture, _check_hardware
 from harness.report import Report
 from harness.analysis import (analyse_bus_census, analyse_contention, analyse_diff,
                               analyse_n_way_diff, analyse_analogue_vs_code,
-                              analyse_bus_e2e)
+                              analyse_bus_e2e, analyse_clock_health)
 
 
 HARNESS_DIR = Path(__file__).parent.resolve()
@@ -177,6 +177,8 @@ def _execute_step(step: dict, step_num: int, total: int, report: Report,
                 params_with_state = dict(params)
                 params_with_state["state"] = report._state
                 result = analyse_bus_e2e(captures, params_with_state)
+            elif kind == "clock_health":
+                result = analyse_clock_health(captures, params)
             else:
                 ui.warn(f"unknown analysis kind: {kind}")
                 return
@@ -196,6 +198,16 @@ def _execute_step(step: dict, step_num: int, total: int, report: Report,
                 s = result.get("summary", {})
                 print(f"    verdict: {ui.BOLD}{s.get('verdict', '?')}{ui.RESET}")
                 print(f"    {ui.DIM}{s}{ui.RESET}")
+            elif kind == "clock_health":
+                v = result.get("verdict", "?")
+                mhz = (result.get("measured_hz") or 0) / 1e6
+                exp_mhz = (result.get("expected_hz") or 0) / 1e6
+                ch = result.get("channel") or 0
+                n_r = result.get("n_rising_edges", 0)
+                verdict_color = ui.GREEN if "within tolerance" in v else (ui.RED if "OUT" in v else ui.YELLOW)
+                print(f"    LA CH{ch+1}: {verdict_color}{v}{ui.RESET}")
+                print(f"    {ui.DIM}measured: {mhz:.4f} MHz  expected: {exp_mhz:.4f} MHz  "
+                      f"n_rising_edges: {n_r:,}{ui.RESET}")
             elif kind == "diff":
                 fd = result.get("first_divergence")
                 if fd:

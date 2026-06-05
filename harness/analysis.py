@@ -747,3 +747,70 @@ def analyse_diff(captures: dict[str, Capture], params: dict) -> dict:
                 }
 
     return out
+
+
+# -----------------------------------------------------------------------------
+# clock_health
+# -----------------------------------------------------------------------------
+
+def analyse_clock_health(captures: dict[str, Capture], params: dict) -> dict:
+    """Measure the frequency of a designated clock channel and report whether
+    it's within tolerance of an expected value.
+
+    params:
+      channel:         which channel (0..7) the clock is on
+      expected_hz:     nominal clock frequency in Hz
+      tolerance_pct:   acceptable deviation (default 5.0)
+
+    Returns measured_hz, n_rising_edges, n_falling_edges, period_ns,
+    and a verdict: 'within tolerance', 'out of tolerance', or 'no edges seen'.
+    """
+    out: dict[str, Any] = {
+        "kind": "clock_health",
+        "channel": None,
+        "expected_hz": None,
+        "measured_hz": None,
+        "n_rising_edges": 0,
+        "n_falling_edges": 0,
+        "period_ns": None,
+        "deviation_pct": None,
+        "verdict": "no edges seen",
+    }
+
+    channel = int(params.get("channel", 0))
+    expected_hz = float(params.get("expected_hz", 1_000_000))
+    tolerance_pct = float(params.get("tolerance_pct", 5.0))
+    out["channel"] = channel
+    out["expected_hz"] = expected_hz
+
+    cap = list(captures.values())[-1]
+    if not cap.vcd_path:
+        return out
+    trans = parse_vcd_transitions(cap.vcd_path, channel)
+    n_rising = sum(1 for t, v in trans if v == 1)
+    n_falling = sum(1 for t, v in trans if v == 0)
+    out["n_rising_edges"] = n_rising
+    out["n_falling_edges"] = n_falling
+
+    if n_rising < 2 or cap.duration_s <= 0:
+        return out
+
+    # Use the time between the first and last rising edge to compute period
+    first_rising = next(t for t, v in trans if v == 1)
+    last_rising = next(t for t, v in reversed(trans) if v == 1)
+    elapsed_ns = last_rising - first_rising
+    if elapsed_ns <= 0:
+        return out
+    period_ns = elapsed_ns / max(1, n_rising - 1)
+    out["period_ns"] = period_ns
+    measured_hz = 1e9 / period_ns
+    out["measured_hz"] = measured_hz
+
+    deviation_pct = abs(measured_hz - expected_hz) / expected_hz * 100.0
+    out["deviation_pct"] = deviation_pct
+    if deviation_pct <= tolerance_pct:
+        out["verdict"] = f"within tolerance ({deviation_pct:.2f}% off, expected {expected_hz:,} Hz)"
+    else:
+        out["verdict"] = (f"OUT OF TOLERANCE ({deviation_pct:.2f}% off, "
+                          f"expected {expected_hz:,} Hz, tolerance {tolerance_pct:.1f}%)")
+    return out

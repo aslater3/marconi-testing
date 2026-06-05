@@ -902,6 +902,443 @@ BUS_E2E_CPU_TO_AC4 = TestDef(
 )
 
 
+# =============================================================================
+# AA2/1 single-board tests
+# =============================================================================
+#
+# These tests probe ONLY AA2/1 (the main CPU board). They are designed so the
+# operator can run them with the unit in a single-board state — recipient
+# boards (AC3, AC4, AC13, AD2, AD4, ...) need not be clipped. The probes
+# listed in each test are all reachable on the AA2/1 PCB.
+#
+# Reference: wiki/projects/marconi-2019a/aa2-1-ic-inventory.md — the 6
+# bus-relevant ICs (IC5 8085, IC10 74LS245, IC11 74LS244, IC13 74LS138,
+# IC20 74LS273, IC21 74LS373) and their pin assignments.
+#
+# Common LA-side channel mapping (1-indexed, matches the Saleae silkscreen):
+#   CH1 = sigrok D0   CH2 = D1   CH3 = D2   CH4 = D3
+#   CH5 = D4   CH6 = D5   CH7 = D6   CH8 = D7
+
+# -----------------------------------------------------------------------------
+# Test 8: AA2/1 CPU Health (8085 clock + ALE + /WR)
+# -----------------------------------------------------------------------------
+# Probes IC5 (P8085A) only:
+#   LA CH1 (D0) = IC5.37  CLK OUT   (3.072 MHz system clock)
+#   LA CH2 (D1) = IC5.30  ALE       (address latch enable)
+#   LA CH3 (D2) = IC5.31  /WR       (write strobe)
+#   LA CH4 (D3) = IC5.32  /RD       (read strobe, for cross-check)
+#   LA CH5 (D4) = IC5.34  IO/M      (IO vs memory cycle)
+#   LA CH6 (D5) = IC5.21  S1        (bus status 1)
+#   LA CH7 (D6) = IC5.22  S0        (bus status 0)
+#   LA CH8 (D7) = GND      (reference — should be LOW throughout)
+# Verdict: clock frequency within tolerance, ALE pulses occurring, /WR pulses
+# occurring. If CLK is dead or wrong frequency, the 8085 is not running.
+# -----------------------------------------------------------------------------
+AA2_CPU_HEALTH = TestDef(
+    name="aa2_cpu_health",
+    description=(
+        "AA2/1-only health check of the 8085 CPU (IC5). Probes CLK, ALE, /WR, "
+        "/RD, S0, S1, and IO/M. Verifies the clock is at 3.072 MHz (within 5%) "
+        "and that ALE and /WR are pulsing — proves the CPU is running and "
+        "issuing bus cycles. No recipient-board access required."
+    ),
+    steps=[
+        {"type": "prompt", "id": "intro", "text": (
+            "=== AA2/1 CPU HEALTH (IC5 P8085A) ===\n"
+            "Goal: confirm the 8085 microprocessor on the mainboard is alive and\n"
+            "running at the correct clock speed (3.072 MHz). All 8 probes are on\n"
+            "AA2/1 IC5 — no other board needs to be touched.\n\n"
+            "PROBE MAP (clip 8 LA channels to AA2/1 IC5 + GND):\n"
+            "  LA CH1 (D0)  → AA2/1 IC5.Pin37  CLK OUT  (system clock, expect 3.072 MHz)\n"
+            "  LA CH2 (D1)  → AA2/1 IC5.Pin30  ALE      (address latch enable)\n"
+            "  LA CH3 (D2)  → AA2/1 IC5.Pin31  /WR      (write strobe — pulses LOW)\n"
+            "  LA CH4 (D3)  → AA2/1 IC5.Pin32  /RD      (read strobe — mostly idle)\n"
+            "  LA CH5 (D4)  → AA2/1 IC5.Pin34  IO/M     (IO vs memory cycle)\n"
+            "  LA CH6 (D5)  → AA2/1 IC5.Pin21  S1       (bus status 1)\n"
+            "  LA CH7 (D6)  → AA2/1 IC5.Pin22  S0       (bus status 0)\n"
+            "  LA CH8 (D7)  → AA2/1 GND         GND      (reference, must stay LOW)\n\n"
+            "ACTION: power ON the 2019A in a quiescent state (no key presses, no\n"
+            "Second Function mode). Let the CPU free-run for 2 seconds while we\n"
+            "capture the bus.\n\n"
+            "Press ENTER to capture."
+        ), "wait_for": "enter"},
+
+        {"type": "capture", "id": "cap_cpu_health", "duration_s": 2.0,
+         "sample_rate_hz": 24_000_000, "channels": list(range(8)),
+         "trigger": None},
+
+        {"type": "analyse", "id": "ana_cpu_health", "kind": "clock_health",
+         "params": {"channel": 0, "expected_hz": 3_072_000, "tolerance_pct": 5.0}},
+
+        {"type": "analyse", "id": "ana_bus_health", "kind": "bus_census",
+         "params": {"reference": "self"}},
+
+        {"type": "note", "id": "obs", "prompt": (
+            "Note the measured clock frequency and which lines are pulsing:\n"
+            "  - Is CLK at ~3.072 MHz (within 5%)?     (verdict: see above)\n"
+            "  - Is ALE pulsing regularly?\n"
+            "  - Is /WR firing at all?\n"
+            "  - Are any of the 8 channels stuck HIGH or LOW?"
+        ), "multiline": True},
+    ],
+)
+
+
+# -----------------------------------------------------------------------------
+# Test 9: AA2/1 Address Bus (IC21 74LS373 demuxer)
+# -----------------------------------------------------------------------------
+# Probes IC21 (74LS373) Q outputs + IC5 /WR (trigger):
+#   LA CH1 (D0) = IC5.31  /WR          (trigger: falling edge)
+#   LA CH2 (D1) = IC5.30  ALE          (qualifier for address phase)
+#   LA CH3 (D2) = IC5.37  CLK          (clock reference)
+#   LA CH4 (D3) = IC21.Pin19  Q0       (latched A0)
+#   LA CH5 (D4) = IC21.Pin6   Q1       (latched A1)
+#   LA CH6 (D5) = IC21.Pin4   Q2       (latched A2)
+#   LA CH7 (D6) = IC21.Pin16  Q3       (latched A3)
+#   LA CH8 (D7) = IC21.Pin14  Q4       (latched A4)
+# ACTION: trigger on Second Function 3 button press (operator presses STORE
+# after typing the data byte). Verify the latched address on Q0..Q4 matches
+# the typed sub-address.
+# -----------------------------------------------------------------------------
+AA2_ADDRESS_BUS = TestDef(
+    name="aa2_address_bus",
+    description=(
+        "AA2/1-only test of the address demuxer (IC21 74LS373). Probes Q0..Q4 "
+        "outputs of IC21 alongside /WR, ALE, and CLK. Capture one Second Function "
+        "3 byte write; verify the latched address is stable during /WR LOW and "
+        "that Q0..Q4 transition when /WR is asserted. AA2/1 only — no recipient "
+        "boards touched."
+    ),
+    steps=[
+        {"type": "prompt", "id": "intro", "text": (
+            "=== AA2/1 ADDRESS BUS (IC21 74LS373) ===\n"
+            "Goal: verify the address demuxer (IC21) is correctly latching the\n"
+            "low-order address bits during every CPU bus cycle. We will capture\n"
+            "a single Second Function 3 write and inspect the latched address.\n\n"
+            "PROBE MAP:\n"
+            "  LA CH1 (D0) → AA2/1 IC5.Pin31  /WR  (trigger — falling edge)\n"
+            "  LA CH2 (D1) → AA2/1 IC5.Pin30  ALE  (address phase qualifier)\n"
+            "  LA CH3 (D2) → AA2/1 IC5.Pin37  CLK  (3.072 MHz reference)\n"
+            "  LA CH4 (D3) → AA2/1 IC21.Pin19  Q0  (latched address A0)\n"
+            "  LA CH5 (D4) → AA2/1 IC21.Pin6   Q1  (latched A1)\n"
+            "  LA CH6 (D5) → AA2/1 IC21.Pin4   Q2  (latched A2)\n"
+            "  LA CH7 (D6) → AA2/1 IC21.Pin16  Q3  (latched A3)\n"
+            "  LA CH8 (D7) → AA2/1 IC21.Pin14  Q4  (latched A4)\n\n"
+            "ACTION (capture one Second Function 3 write to A7L2):\n"
+            "  1) Set up the 2019A: power on, no Second Function yet\n"
+            "  2) Press ENTER to begin the 5-second capture\n"
+            "  3) When you see \"Capturing\" in the dashboard, press:\n"
+            "       SECOND FUNCT → 3 → 7 → 0 → 0 → 0 → 0 → 0 → 0 → 0 → 0 → STORE\n"
+            "     (this writes 0x00 to A7L2 — one byte)\n"
+            "  4) Wait for the capture to end\n\n"
+            "Press ENTER to begin."
+        ), "wait_for": "enter"},
+
+        {"type": "capture", "id": "cap_address_bus", "duration_s": 5.0,
+         "sample_rate_hz": 24_000_000, "channels": list(range(8)),
+         "trigger": {"channel": 0, "edge": "falling"}},
+
+        {"type": "analyse", "id": "ana_address_bus", "kind": "bus_census",
+         "params": {"reference": "self"}},
+
+        {"type": "note", "id": "obs", "prompt": (
+            "Examine the bus_census output:\n"
+            "  - /WR (CH1) should have at least 2 transitions (one write cycle)\n"
+            "  - ALE (CH2) should have at least 4 transitions (multiple bus cycles)\n"
+            "  - Q0..Q4 (CH4..CH8) should each have at least 1 transition — if any\n"
+            "    are stuck LOW or stuck HIGH, IC21 is suspect.\n"
+            "  - Does the pattern of Q0..Q4 transitions correlate with /WR pulses?"
+        ), "multiline": True},
+    ],
+)
+
+
+# -----------------------------------------------------------------------------
+# Test 10: AA2/1 IC11 'C' line alone (the shark-fin localiser)
+# -----------------------------------------------------------------------------
+# Probes IC11 (74LS244) Y outputs — the address buffers. The 'C' line is on
+# Pin 18. This is the AA2-only version of contention_detector: same target
+# (the 'C' line), no cross-board probes.
+#   LA CH1 (D0) = IC11.Pin18  Y7  ('C' line — the shark-fin target)
+#   LA CH2 (D1) = IC11.Pin16  Y6  ('B' line — control)
+#   LA CH3 (D2) = IC11.Pin14  Y5  ('A' line — control)
+#   LA CH4 (D3) = IC11.Pin12  Y4
+#   LA CH5 (D4) = IC11.Pin8   Y3
+#   LA CH6 (D5) = IC11.Pin6   Y2
+#   LA CH7 (D6) = IC11.Pin4   Y1
+#   LA CH8 (D7) = IC11.Pin2   Y0
+# All 8 Y outputs of IC11 — single IC, single board.
+# -----------------------------------------------------------------------------
+AA2_IC11_ALONE = TestDef(
+    name="aa2_ic11_alone",
+    description=(
+        "AA2/1-only localiser for the 'C' line shark-fin fault. Probes all 8 Y "
+        "outputs of IC11 (74LS244) — the address buffer that drives the bus "
+        "downstream. The 'C' line is on Pin 18 (Y7). Cable-isolation test "
+        "proved IC11 is healthy when its load is removed; this test re-checks "
+        "with all boards in place, on AA2-side only, so you can decide whether "
+        "the fault is on the AA2 side of IC11 or downstream. No cross-board "
+        "clipping required."
+    ),
+    steps=[
+        {"type": "prompt", "id": "intro", "text": (
+            "=== AA2/1 IC11 ALONE (74LS244 address buffer) ===\n"
+            "Goal: observe all 8 buffered address lines on IC11 in isolation\n"
+            "(no recipient boards need to be clipped). The 'C' line is on\n"
+            "Pin 18 (Y7) — this is the line that showed the shark-fin on the\n"
+            "scope. The cable-isolation test proved IC11 is healthy when its\n"
+            "load is removed; this test re-checks with everything connected.\n\n"
+            "PROBE MAP — all on AA2/1 IC11:\n"
+            "  LA CH1 (D0) → AA2/1 IC11.Pin18  Y7  ('C' line — the target)\n"
+            "  LA CH2 (D1) → AA2/1 IC11.Pin16  Y6  ('B' line — control)\n"
+            "  LA CH3 (D2) → AA2/1 IC11.Pin14  Y5  ('A' line — control)\n"
+            "  LA CH4 (D3) → AA2/1 IC11.Pin12  Y4\n"
+            "  LA CH5 (D4) → AA2/1 IC11.Pin8   Y3\n"
+            "  LA CH6 (D5) → AA2/1 IC11.Pin6   Y2\n"
+            "  LA CH7 (D6) → AA2/1 IC11.Pin4   Y1\n"
+            "  LA CH8 (D7) → AA2/1 IC11.Pin2   Y0\n\n"
+            "ACTION (5 seconds of normal front-panel activity):\n"
+            "  1) Press ENTER to begin the 5-second capture\n"
+            "  2) During capture, press a few front-panel keys to provoke bus\n"
+            "     activity: STEP UP, STEP DOWN, RANGE, MODULATION, frequency\n"
+            "     select — anything that causes the CPU to write a latch\n"
+            "  3) If the fault is intermittent, try toggling a 1 dB step a few\n"
+            "     times — the A7L2 fine attenuator write will exercise the 'C' line\n\n"
+            "Press ENTER to begin."
+        ), "wait_for": "enter"},
+
+        {"type": "capture", "id": "cap_ic11_alone", "duration_s": 5.0,
+         "sample_rate_hz": 24_000_000, "channels": list(range(8)),
+         "trigger": None},
+
+        {"type": "analyse", "id": "ana_ic11_alone", "kind": "bus_census",
+         "params": {"reference": "self"}},
+
+        {"type": "note", "id": "obs", "prompt": (
+            "Interpret the bus_census output:\n"
+            "  - The 'C' line (CH1, Y7) should toggle during bus activity\n"
+            "  - The 'B' line (CH2, Y6) and 'A' line (CH3, Y5) are the address\n"
+            "    bits that select the latches — they should also toggle\n"
+            "  - All 8 lines should show roughly comparable activity (any line\n"
+            "    with zero edges is suspect — either IC11 pin is dead or the\n"
+            "    line is stuck)\n"
+            "  - Compare the activity pattern of the 'C' line to the 'A' and 'B'\n"
+            "    lines. A shark-fin manifests as many rapid transitions on the\n"
+            "    'C' line within a single bus cycle; on the scope you'd see a\n"
+            "    rising edge followed by a slow RC droop rather than a clean fall."
+        ), "multiline": True},
+    ],
+)
+
+
+# -----------------------------------------------------------------------------
+# Test 11: AA2/1 IC20 Latch (74LS273 — replaced chip, verify replacement)
+# -----------------------------------------------------------------------------
+# IC20 was previously replaced (per wiki). This test verifies the
+# replacement is functional by watching the latch capture a Second Function 3
+# write.
+#   LA CH1 (D0) = IC5.31  /WR
+#   LA CH2 (D1) = IC5.30  ALE
+#   LA CH3 (D2) = IC20.Pin11  CLK  (data-valid strobe for external latches)
+#   LA CH4 (D3) = IC20.Pin3   D0  (data input 0)
+#   LA CH5 (D4) = IC20.Pin4   D1
+#   LA CH6 (D5) = IC20.Pin7   D2
+#   LA CH7 (D6) = IC20.Pin8   D3
+#   LA CH8 (D7) = IC20.Pin13  D4
+# Verifies the CLK pin pulses and that D0..D4 carry data during /WR.
+# -----------------------------------------------------------------------------
+AA2_IC20_LATCH = TestDef(
+    name="aa2_ic20_latch",
+    description=(
+        "AA2/1-only verification of IC20 (74LS273 octal D-latch). Probes the "
+        "CLK input (Pin 11) and 5 of the 8 D inputs. The wiki notes IC20 was "
+        "previously replaced and the replacement ruled out as the fault "
+        "source — this test confirms the replacement is healthy. Drive it "
+        "with a Second Function 3 write and verify CLK pulses and D0..D4 "
+        "carry data during /WR."
+    ),
+    steps=[
+        {"type": "prompt", "id": "intro", "text": (
+            "=== AA2/1 IC20 LATCH (74LS273 — previously replaced) ===\n"
+            "Goal: verify the IC20 replacement is healthy by capturing a\n"
+            "Second Function 3 write and checking that CLK pulses and the\n"
+            "D0..D4 inputs carry data.\n\n"
+            "PROBE MAP — all on AA2/1:\n"
+            "  LA CH1 (D0) → AA2/1 IC5.Pin31   /WR  (CPU write strobe — trigger)\n"
+            "  LA CH2 (D1) → AA2/1 IC5.Pin30   ALE  (address phase qualifier)\n"
+            "  LA CH3 (D2) → AA2/1 IC20.Pin11  CLK  (latch data-valid strobe)\n"
+            "  LA CH4 (D3) → AA2/1 IC20.Pin3   D0   (data input 0)\n"
+            "  LA CH5 (D4) → AA2/1 IC20.Pin4   D1\n"
+            "  LA CH6 (D5) → AA2/1 IC20.Pin7   D2\n"
+            "  LA CH7 (D6) → AA2/1 IC20.Pin8   D3\n"
+            "  LA CH8 (D7) → AA2/1 IC20.Pin13  D4\n\n"
+            "ACTION (one Second Function 3 write to A7L2):\n"
+            "  1) Power on, no Second Function yet\n"
+            "  2) Press ENTER to begin 5-second capture\n"
+            "  3) When dashboard shows \"Capturing\", press:\n"
+            "       SECOND FUNCT → 3 → 7 → 0 → 1 → 0 → 1 → 0 → 1 → 0 → 1 → STORE\n"
+            "     (this writes 0x55 to A7L2 — the LSB nibble toggles D0..D3)\n"
+            "  4) Wait for capture to end\n\n"
+            "Press ENTER to begin."
+        ), "wait_for": "enter"},
+
+        {"type": "capture", "id": "cap_ic20_latch", "duration_s": 5.0,
+         "sample_rate_hz": 24_000_000, "channels": list(range(8)),
+         "trigger": {"channel": 0, "edge": "falling"}},
+
+        {"type": "analyse", "id": "ana_ic20_latch", "kind": "bus_census",
+         "params": {"reference": "self"}},
+
+        {"type": "note", "id": "obs", "prompt": (
+            "Interpret:\n"
+            "  - IC20.CLK (CH3) should pulse at least once (the rising edge that\n"
+            "    latches the data)\n"
+            "  - D0..D3 (CH4..CH7) should each transition at least twice if the\n"
+            "    bus_census sees the full 0x55 pattern (the bit pattern is\n"
+            "    01010101 so each bit toggles four times during the byte)\n"
+            "  - If CLK is silent, the 8085 is not generating latch strobes for\n"
+            "    IC20 — but that is unlikely if /WR is firing."
+        ), "multiline": True},
+    ],
+)
+
+
+# -----------------------------------------------------------------------------
+# Test 12: AA2/1 IC21 Latch Detail (74LS373 — address demuxer detail)
+# -----------------------------------------------------------------------------
+# 8 channels all on IC21: D0..D7 inputs from the multiplexed AD0..AD7 bus,
+# plus LE (= ALE).
+#   LA CH1 (D0) = IC21.Pin3   D0  (input from 8085 AD0)
+#   LA CH2 (D1) = IC21.Pin4   D1  (input from 8085 AD1)
+#   LA CH3 (D2) = IC21.Pin7   D2
+#   LA CH4 (D3) = IC21.Pin8   D3
+#   LA CH5 (D4) = IC21.Pin13  D4
+#   LA CH6 (D5) = IC21.Pin14  D5
+#   LA CH7 (D6) = IC21.Pin17  D6
+#   LA CH8 (D7) = IC21.Pin18  D7
+# LE is wired to ALE — capture from a parallel pin (IC5.30). But we only
+# have 8 channels. So we drop one D input to keep the LE probe — see
+# aa2_address_bus for the /WR+ALE+CLK+5x Q variant. This test is the
+# 8-D-input variant: pure data view of the demuxer.
+# -----------------------------------------------------------------------------
+AA2_IC21_LATCH = TestDef(
+    name="aa2_ic21_latch",
+    description=(
+        "AA2/1-only 8-channel view of IC21 (74LS373) D inputs from the 8085's "
+        "multiplexed AD0..AD7 bus. The D inputs carry address bits during the "
+        "first half of every bus cycle (when ALE is HIGH) and data bits during "
+        "the second half. Bus_census reports per-channel activity. AA2/1 only — "
+        "no recipient boards touched."
+    ),
+    steps=[
+        {"type": "prompt", "id": "intro", "text": (
+            "=== AA2/1 IC21 LATCH (74LS373 — 8 D-input view) ===\n"
+            "Goal: capture the demultiplexer's 8 D inputs (AD0..AD7 from the\n"
+            "8085) over 5 seconds of normal bus activity. Bus_census will\n"
+            "report per-channel activity. All 8 channels are on AA2/1 IC21.\n\n"
+            "PROBE MAP — all on AA2/1 IC21 (74LS373):\n"
+            "  LA CH1 (D0) → AA2/1 IC21.Pin3   D0   (8085 AD0)\n"
+            "  LA CH2 (D1) → AA2/1 IC21.Pin4   D1   (8085 AD1)\n"
+            "  LA CH3 (D2) → AA2/1 IC21.Pin7   D2   (8085 AD2)\n"
+            "  LA CH4 (D3) → AA2/1 IC21.Pin8   D3   (8085 AD3)\n"
+            "  LA CH5 (D4) → AA2/1 IC21.Pin13  D4   (8085 AD4)\n"
+            "  LA CH6 (D5) → AA2/1 IC21.Pin14  D5   (8085 AD5)\n"
+            "  LA CH7 (D6) → AA2/1 IC21.Pin17  D6   (8085 AD6)\n"
+            "  LA CH8 (D7) → AA2/1 IC21.Pin18  D7   (8085 AD7)\n\n"
+            "ACTION: power ON, no key presses, just let the CPU free-run for\n"
+            "5 seconds. The 8085 executes its monitor loop continuously — this\n"
+            "is enough to produce a meaningful edge count per channel.\n\n"
+            "Press ENTER to begin."
+        ), "wait_for": "enter"},
+
+        {"type": "capture", "id": "cap_ic21_latch", "duration_s": 5.0,
+         "sample_rate_hz": 24_000_000, "channels": list(range(8)),
+         "trigger": None},
+
+        {"type": "analyse", "id": "ana_ic21_latch", "kind": "bus_census",
+         "params": {"reference": "self"}},
+
+        {"type": "note", "id": "obs", "prompt": (
+            "Interpret:\n"
+            "  - D0..D7 (CH1..CH8) should all have edge counts in the same order\n"
+            "    of magnitude. The 8085 reads program memory from IC1..IC4 and\n"
+            "    so AD0..AD7 carry instruction bytes continuously — heavy\n"
+            "    activity on all 8 channels is normal.\n"
+            "  - A dead AD line (zero edges) would mean the 8085 is not driving\n"
+            "    that bit, or IC21's input pin is broken.\n"
+            "  - A wildly asymmetric edge count (e.g. D7 has 10x more edges\n"
+            "    than D0) is normal — different bits toggle at different rates\n"
+            "    in code. What's NOT normal is zero edges on any one line."
+        ), "multiline": True},
+    ],
+)
+
+
+# -----------------------------------------------------------------------------
+# Test 13: AA2/1 IC10 Transceiver (74LS245 — bus xcvr)
+# -----------------------------------------------------------------------------
+# Probes IC10 (74LS245): 4 of the 8 A-side pins + 4 control/status.
+#   LA CH1 (D0) = IC10.Pin1   DIR   (direction: HIGH=AA2 drives bus)
+#   LA CH2 (D1) = IC10.Pin19  /OE   (output enable — should be LOW)
+#   LA CH3 (D2) = IC10.Pin2   A0    (data bit 0, motherboard side)
+#   LA CH4 (D3) = IC10.Pin5   A1
+#   LA CH5 (D4) = IC10.Pin7   A2
+#   LA CH6 (D5) = IC10.Pin10  A3
+#   LA CH7 (D6) = IC5.31      /WR   (qualifier — DIR should follow /WR)
+#   LA CH8 (D7) = IC5.30      ALE   (qualifier)
+# -----------------------------------------------------------------------------
+AA2_IC10_XCVR = TestDef(
+    name="aa2_ic10_xcvr",
+    description=(
+        "AA2/1-only health check of IC10 (74LS245) bus transceiver. Probes "
+        "DIR, /OE, A0..A3, plus /WR and ALE as qualifiers. The DIR line "
+        "should be HIGH during CPU writes (AA2 driving the cable) and LOW "
+        "during reads. /OE should be LOW (enabled) for the duration of any "
+        "active bus cycle. AA2/1 only — no recipient boards touched."
+    ),
+    steps=[
+        {"type": "prompt", "id": "intro", "text": (
+            "=== AA2/1 IC10 BUS TRANSCEIVER (74LS245) ===\n"
+            "Goal: verify the bus transceiver is correctly driving the ribbon\n"
+            "cable during writes. DIR should follow /WR; /OE should be LOW\n"
+            "throughout active cycles.\n\n"
+            "PROBE MAP — on AA2/1 IC10 + IC5 (control signals):\n"
+            "  LA CH1 (D0) → AA2/1 IC10.Pin1   DIR  (direction control)\n"
+            "  LA CH2 (D1) → AA2/1 IC10.Pin19  /OE  (output enable — expect LOW)\n"
+            "  LA CH3 (D2) → AA2/1 IC10.Pin2   A0   (motherboard-side data 0)\n"
+            "  LA CH4 (D3) → AA2/1 IC10.Pin5   A1\n"
+            "  LA CH5 (D4) → AA2/1 IC10.Pin7   A2\n"
+            "  LA CH6 (D5) → AA2/1 IC10.Pin10  A3\n"
+            "  LA CH7 (D6) → AA2/1 IC5.Pin31   /WR  (CPU write strobe — qualifier)\n"
+            "  LA CH8 (D7) → AA2/1 IC5.Pin30   ALE  (address phase qualifier)\n\n"
+            "ACTION: power on, no key presses. Capture 5 seconds of idle.\n\n"
+            "Press ENTER to begin."
+        ), "wait_for": "enter"},
+
+        {"type": "capture", "id": "cap_ic10_xcvr", "duration_s": 5.0,
+         "sample_rate_hz": 24_000_000, "channels": list(range(8)),
+         "trigger": None},
+
+        {"type": "analyse", "id": "ana_ic10_xcvr", "kind": "bus_census",
+         "params": {"reference": "self"}},
+
+        {"type": "note", "id": "obs", "prompt": (
+            "Interpret:\n"
+            "  - /OE (CH2) should be LOW or have very few rising edges — if it's\n"
+            "    stuck HIGH, IC10 is not driving the bus at all (data is not\n"
+            "    reaching the ribbon cable)\n"
+            "  - DIR (CH1) should toggle with /WR (CH7) — many write cycles\n"
+            "    means many DIR transitions\n"
+            "  - A0..A3 (CH3..CH6) should have heavy activity (the 8085 reads\n"
+            "    program memory continuously, so AD0..AD7 toggle even when\n"
+            "    the user is idle)\n"
+            "  - Zero edges on any of A0..A3 is a hard fault — IC10 pin dead\n"
+            "    or upstream AD line broken"
+        ), "multiline": True},
+    ],
+)
+
+
 # -----------------------------------------------------------------------------
 # Registry
 # -----------------------------------------------------------------------------
@@ -913,6 +1350,12 @@ REGISTRY: dict[str, TestDef] = {
     "ls273_sequence": LS273_SEQUENCE,
     "dac_dmm_crosscheck": DAC_DMM_CROSSCHECK,
     "bus_e2e_cpu_to_ac4": BUS_E2E_CPU_TO_AC4,
+    "aa2_cpu_health": AA2_CPU_HEALTH,
+    "aa2_address_bus": AA2_ADDRESS_BUS,
+    "aa2_ic11_alone": AA2_IC11_ALONE,
+    "aa2_ic20_latch": AA2_IC20_LATCH,
+    "aa2_ic21_latch": AA2_IC21_LATCH,
+    "aa2_ic10_xcvr": AA2_IC10_XCVR,
 }
 
 
