@@ -62,17 +62,35 @@ BUS_CENSUS = TestDef(
             "Press ENTER when ready to start."
         ), "wait_for": "enter"},
 
-        {"type": "clip", "id": "clip_baseline", "text": "Clip the 8 LA channels to the address bus on AA2/1:",
+        # PROBE MAP NOTES (see probe-map-audit.md in the wiki for full audit):
+        #  - IC11 (74LS244) buffers the ADDRESS bus; its Y outputs are on
+        #    pins 2,4,6,8,12,14,16,18. The A/B/C <-> Y-output mapping is
+        #    NOT documented in the wiki — to be confirmed from the 2019A
+        #    schematic (page-014 Fig. 3) before relying on this map.
+        #  - IC10 (74LS245) drives the DATA bus; A0-A7 are on pins
+        #    2,5,7,10,12,15,17,20. This is the canonical data bus.
+        #  - IC20 (74LS273) Pin 11 is CLK = data-valid strobe for external
+        #    latches — useful as a CH7 trigger reference.
+        #  - IC11.Pin9 is GND on a 20-pin DIP — DO NOT probe there.
+        {"type": "clip", "id": "clip_baseline", "text": (
+            "Clip the 8 LA channels to the AA2/1 bus:\n"
+            "  - 8 channel clips as listed below\n"
+            "  - 1 GND clip on AA2/1 GND (e.g. Pin 10 of any 74LSxx, or the AA2 TP_GND)\n\n"
+            "NOTE on A/B/C labels: IC11's Y outputs carry the 3-bit address "
+            "field, but which Y-output is A, B, or C is not in the wiki. "
+            "Verify against page-014 Fig. 3 of the service manual before "
+            "drawing diagnostic conclusions.\n"
+        ),
          "channels": [0, 1, 2, 3, 4, 5, 6, 7],
          "probes": {
-             0: "AA2/1 IC11.Pin18  (bus 'C' address line, the suspect)",
-             1: "AA2/1 IC11.Pin16  (bus 'B' address line)",
-             2: "AA2/1 IC11.Pin14  (bus 'A' address line)",
-             3: "AA2/1 IC11.Pin12  (bus D0 data line)",
-             4: "AA2/1 IC11.Pin9   (bus D1 data line)",
-             5: "AA2/1 IC11.Pin7   (bus D2 data line)",
-             6: "AA2/1 IC11.Pin5   (bus D3 data line)",
-             7: "AA2/1 connector.Pin (any strobe/CS, e.g. AA2 LB strobe)",
+             0: "AA2/1 IC11.Pin18  (bus 'C' address line — the suspect; assumes Y7=C)",
+             1: "AA2/1 IC11.Pin16  (bus 'B' address line — assumes Y6=B)",
+             2: "AA2/1 IC11.Pin14  (bus 'A' address line — assumes Y5=A)",
+             3: "AA2/1 IC10.Pin2   (data bus A0 = 74LS245 A-side bit 0)",
+             4: "AA2/1 IC10.Pin5   (data bus A1 = 74LS245 A-side bit 1)",
+             5: "AA2/1 IC10.Pin7   (data bus A2 = 74LS245 A-side bit 2)",
+             6: "AA2/1 IC10.Pin10  (data bus A3 = 74LS245 A-side bit 3)",
+             7: "AA2/1 IC20.Pin11  (74LS273 CLK = data-valid strobe for ext. latches)",
          },
          "wait_for": "enter"},
 
@@ -453,17 +471,33 @@ LS273_SEQUENCE = TestDef(
             "Press ENTER to start."
         ), "wait_for": "enter"},
 
-        {"type": "clip", "id": "clip", "text": "Clip 8 channels to the data bus + strobes:",
+        # PROBE MAP NOTES (see probe-map-audit.md in the wiki for full audit):
+        #  - IC11 (74LS244) is the ADDRESS buffer, not the data buffer.
+        #  - IC10 (74LS245) drives the DATA bus. A0-A4 are on pins
+        #    2, 5, 7, 10, 12. The harness originally clipped CH0-CH4 to
+        #    IC11 (wrong IC, and IC11.Pin9 is GND on a 20-pin DIP) — fixed.
+        #  - "D0 data line — 273 output bit 0" labels in the original map
+        #    were misleading: the 74LS245 drives data ONTO the bus, but the
+        #    suspect 74LS273 is on AD2 (the A6L10 latch), not on AA2/1.
+        #    The probe here is "data bus A0 bit, while a 273 write happens
+        #    downstream on AD2". The harness watches for the bit toggling
+        #    correctly as the test writes codes 1, 2, 4 through Second
+        #    Function 3.
+        {"type": "clip", "id": "clip", "text": (
+            "Clip 8 channels to the data bus + strobes:\n"
+            "  - 8 channel clips as listed below\n"
+            "  - 1 GND clip on AA2/1 GND (e.g. Pin 10 of any 74LSxx, or AA2 TP_GND)\n"
+        ),
          "channels": list(range(8)),
          "probes": {
-             0: "AA2/1 IC11.Pin12 (D0 data line — 273 output bit 0)",
-             1: "AA2/1 IC11.Pin9  (D1 data line — 273 output bit 1)",
-             2: "AA2/1 IC11.Pin7  (D2 data line — 273 output bit 2)",
-             3: "AA2/1 IC11.Pin5  (D3 data line — 273 output bit 3)",
-             4: "AA2/1 IC11.Pin3  (D4 data line — 273 output bit 4)",
-             5: "AC4 AD7522.Pin24 LB strobe",
-             6: "AC4 AD7522.Pin21 LDAC",
-             7: "GND (reference)",
+             0: "AA2/1 IC10.Pin2   (data bus A0 = 74LS245 A-side bit 0)",
+             1: "AA2/1 IC10.Pin5   (data bus A1 = 74LS245 A-side bit 1)",
+             2: "AA2/1 IC10.Pin7   (data bus A2 = 74LS245 A-side bit 2)",
+             3: "AA2/1 IC10.Pin10  (data bus A3 = 74LS245 A-side bit 3)",
+             4: "AA2/1 IC10.Pin12  (data bus A4 = 74LS245 A-side bit 4)",
+             5: "AC4 AD7522.Pin24  (LB strobe — latches A0-A7 on the DAC)",
+             6: "AC4 AD7522.Pin21  (LDAC — loads the DAC from the latched byte)",
+             7: "GND (reference — clip to AA2/1 GND)",
          },
          "wait_for": "enter"},
 
@@ -540,7 +574,8 @@ DAC_DMM_CROSSCHECK = TestDef(
             "Hypothesis: the AD7522LN DAC has an internal latch fault — digital inputs "
             "look clean, but analog output is wrong.\n\n"
             "Procedure:\n"
-            "  1) DMM on AC4 TP2 (mV DC mode)\n"
+            "  1) DMM on AC4 TP2 (mV DC mode). DMM negative (COM) lead to AC4 TP_GND "
+            "(any AC4 GND test point is fine, or Pin 7 of any AC4 74LSxx IC).\n"
             "  2) For each code {0, 1024, 2048, 4095} (12-bit):\n"
             "     - Enter the code, press STORE\n"
             "     - Wait ~100ms for settling\n"
