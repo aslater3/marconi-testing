@@ -162,7 +162,8 @@ def render_dashboard(channels: dict[int, bool], labels: dict[int, str],
             label = label[:25] + "..."
         bar = _waveform_char(state) * bar_width
         state_str = f"{GREEN}HIGH{RESET}" if state else f"{DIM}LOW {RESET}"
-        print(f"  ch{ch} {DIM}│{RESET} {label:<28s} {DIM}│{RESET} {state_str}  {bar}")
+        # Display LA-side channel number (1-indexed, matches silkscreen)
+        print(f"  LA CH{ch+1:<2d} {DIM}│{RESET} {label:<28s} {DIM}│{RESET} {state_str}  {bar}")
 
 
 def channel_label(probes: dict[int, str], ch: int) -> str:
@@ -528,7 +529,8 @@ def live_capture_progress(duration_s: float,
             bar = _waveform_char(s) * bar_width
             edge_str = (f"  {DIM}↑{n_r} ↓{n_f}{RESET}"
                         if (n_r or n_f) else f"  {DIM}(no edges){RESET}")
-            print(f"{CLEAR_LINE}  ch{ch_num} {DIM}│{RESET} "
+            # Display LA-side channel number (1-indexed, matches silkscreen)
+            print(f"{CLEAR_LINE}  LA CH{ch_num+1:<2d} {DIM}│{RESET} "
                   f"{label:<28s} {DIM}│{RESET} {state_str}  {bar}{edge_str}")
 
         if remaining <= 0:
