@@ -185,19 +185,25 @@ def _execute_step(step: dict, step_num: int, total: int, report: Report,
             report.add_event(step_id, "analysis", kind=kind, params=params, result=result)
             ui.success(f"analysis complete: {kind}")
             # Render a one-line-per-channel summary for the dashboard
-            if kind == "bus_census" and "channels" in result:
-                print()
-                for ch_name, info in result["channels"].items():
-                    verdict = info.get("health", "?")
-                    color = ui.GREEN if verdict == "ok" else (ui.RED if verdict in ("degraded", "suspicious", "constant") else ui.YELLOW)
-                    print(f"    {ch_name}: {color}{verdict}{ui.RESET}  "
-                          f"edges={info.get('n_edges', 0)}  "
-                          f"rising/falling={info.get('n_rising', 0)}/{info.get('n_falling', 0)}  "
-                          f"{ui.DIM}{info.get('notes', '')}{ui.RESET}")
+            if kind == "bus_census":
+                if result.get("skipped"):
+                    print(f"    {ui.YELLOW}⊘ skipped: {result.get('reason', '?')}{ui.RESET}")
+                elif "channels" in result:
+                    print()
+                    for ch_name, info in result["channels"].items():
+                        verdict = info.get("health", "?")
+                        color = ui.GREEN if verdict == "ok" else (ui.RED if verdict in ("degraded", "suspicious", "constant") else ui.YELLOW)
+                        print(f"    {ch_name}: {color}{verdict}{ui.RESET}  "
+                              f"edges={info.get('n_edges', 0)}  "
+                              f"rising/falling={info.get('n_rising', 0)}/{info.get('n_falling', 0)}  "
+                              f"{ui.DIM}{info.get('notes', '')}{ui.RESET}")
             elif kind == "contention":
-                s = result.get("summary", {})
-                print(f"    verdict: {ui.BOLD}{s.get('verdict', '?')}{ui.RESET}")
-                print(f"    {ui.DIM}{s}{ui.RESET}")
+                if result.get("skipped"):
+                    print(f"    {ui.YELLOW}⊘ skipped: {result.get('reason', '?')}{ui.RESET}")
+                else:
+                    s = result.get("summary", {})
+                    print(f"    verdict: {ui.BOLD}{s.get('verdict', '?')}{ui.RESET}")
+                    print(f"    {ui.DIM}{s}{ui.RESET}")
             elif kind == "clock_health":
                 v = result.get("verdict", "?")
                 mhz = (result.get("measured_hz") or 0) / 1e6

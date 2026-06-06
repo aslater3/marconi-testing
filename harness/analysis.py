@@ -505,6 +505,14 @@ def analyse_bus_census(captures: dict[str, Capture], params: dict) -> dict:
     target_id = params.get("reference", "self")
     expect_quiescent = params.get("expect_quiescent")
 
+    # Guard: a prior capture step may have failed. Don't crash with
+    # IndexError on the empty captures dict — return a clear "skipped"
+    # verdict so the report JSON is still well-formed.
+    if not captures:
+        out["skipped"] = True
+        out["reason"] = "no capture available — prior capture step failed"
+        return out
+
     if expect_quiescent and expect_quiescent != "self":
         ref_cap = _resolve_capture(captures, expect_quiescent)
         target_cap = list(captures.values())[-1]  # most recent
@@ -605,6 +613,14 @@ def analyse_contention(captures: dict[str, Capture], params: dict) -> dict:
     out: dict[str, Any] = {"kind": "contention", "events": [], "summary": {}}
     suspect_ch = int(params.get("suspect_channel", 0))
     cs_channels = [int(c) for c in params.get("cs_channels", [])]
+
+    # Guard: a prior capture step may have failed. Don't crash with
+    # IndexError on the empty captures dict — return a clear "skipped"
+    # verdict so the report JSON is still well-formed.
+    if not captures:
+        out["skipped"] = True
+        out["reason"] = "no capture available — prior capture step failed"
+        return out
 
     cap = list(captures.values())[-1]
     suspect_trans = parse_vcd_transitions(cap.vcd_path, suspect_ch) if cap.vcd_path else []
@@ -782,6 +798,16 @@ def analyse_clock_health(captures: dict[str, Capture], params: dict) -> dict:
     tolerance_pct = float(params.get("tolerance_pct", 5.0))
     out["channel"] = channel
     out["expected_hz"] = expected_hz
+
+    # Guard: a prior capture step may have failed (timeout, no hardware,
+    # sigrok crashed). Don't crash with IndexError on the empty captures
+    # dict — return a clear "skipped" verdict so the report JSON is still
+    # well-formed and the operator can see *why* analysis is missing.
+    if not captures:
+        out["skipped"] = True
+        out["reason"] = "no capture available — prior capture step failed"
+        out["verdict"] = "skipped (no capture)"
+        return out
 
     cap = list(captures.values())[-1]
     if not cap.vcd_path:

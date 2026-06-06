@@ -506,12 +506,33 @@ def capture(step: dict, out_dir: Path, mode: str = "auto",
             except Exception as e:  # noqa: BLE001 — never let a UI hook kill a capture
                 print(f"warning: on_progress hook raised {e!r}", file=sys.stderr)
         try:
-            proc.wait(timeout=duration_s + 10)
+            # Give sigrok plenty of headroom on top of the wall-clock duration.
+            # Old value of `duration_s + 10` was too tight on macOS for
+            # 24 MHz × 8ch captures — sigrok's own startup + VCD writer
+            # overhead routinely pushed a 2 s capture past 12 s of wall time,
+            # and the timeout was firing before the data was fully written.
+            # 45 s is comfortable for a 2 s capture at the LA's max rate
+            # and still fails fast enough to be useful in dry-run.
+            proc.wait(timeout=duration_s + 45)
         except subprocess.TimeoutExpired:
             proc.kill()
             proc.wait()
             pump_done.wait(timeout=2)
-            raise RuntimeError(f"sigrok-cli timed out after {duration_s + 10}s")
+            # CRITICAL: flush whatever we DID capture before raising.
+            # The whole point of the in-memory live_buffer path is to
+            # survive teardown — without this flush, every timeout throws
+            # away all the data the dashboard just showed the operator,
+            # and the analysers then crash on an empty VCD. After the
+            # flush, the partial VCD on disk is at least analysable, so
+            # the operator gets a real verdict on what was captured.
+            if use_pipe and live_buffer is not None:
+                try:
+                    data, _ = live_buffer.read_since(0)
+                    vcd_path.write_bytes(data)
+                except Exception as flush_err:  # noqa: BLE001
+                    print(f"warning: buffer flush on timeout failed: "
+                          f"{flush_err!r}", file=sys.stderr)
+            raise RuntimeError(f"sigrok-cli timed out after {duration_s + 45}s")
         # sigrok has exited; let the reader drain any remaining bytes
         pump_thread.join(timeout=2)
         if proc.returncode != 0:
