@@ -203,8 +203,18 @@ def progress_bar(current: int, total: int, width: int = 50, prefix: str = "") ->
     sys.stdout.flush()
 
 
-def countdown_progress(duration_s: float, prefix: str = "Capturing") -> None:
-    """Show a live countdown. Used while sigrok captures."""
+def countdown_progress(duration_s: float, prefix: str = "Capturing",
+                       should_stop: Optional[Callable[[], bool]] = None) -> None:
+    """Show a live countdown. Used while sigrok captures.
+
+    If `should_stop` is provided, the countdown exits early as soon as
+    it returns True. This is critical: the capture step may have
+    failed in milliseconds (e.g. "No devices found"), but the
+    dashboard is started in a background thread that doesn't otherwise
+    know. Without this hook, the dashboard would happily run its full
+    `duration_s` countdown long after the capture step has errored
+    out, confusing the operator and wasting wall time.
+    """
     start = time.time()
     width = 40
     while True:
@@ -216,6 +226,8 @@ def countdown_progress(duration_s: float, prefix: str = "Capturing") -> None:
         sys.stdout.write(f"\r{CLEAR_LINE}{prefix} {bar} {elapsed:5.1f}s / {duration_s:5.1f}s")
         sys.stdout.flush()
         if remaining <= 0:
+            break
+        if should_stop is not None and should_stop():
             break
         time.sleep(0.1)
     print()
@@ -434,18 +446,25 @@ def live_capture_progress(duration_s: float,
         raise ValueError("live_capture_progress: pass exactly one of "
                          "vcd_path (legacy file mode) or live_buffer (streaming mode)")
 
-    # Parse the $var header (waits up to 5s for sigrok to start streaming)
+    # Parse the $var header (waits for sigrok to start streaming)
+    # Old max_wait_s was 5.0 — way too long for the no-device case where
+    # sigrok exits in <100ms with status 1. sigrok's VCD header arrives
+    # in <100ms when the device is connected, so 1.0s is more than
+    # enough for healthy runs and saves 4s of operator time per failed
+    # run.
     if live_buffer is not None:
         var_id_map, _ts_str, ts_factor = _parse_vcd_header_from_buffer(
-            live_buffer, max_wait_s=5.0)
+            live_buffer, max_wait_s=1.0)
     else:
         var_id_map, _ts_str, ts_factor = _parse_vcd_header_for_dashboard(
-            vcd_path, max_wait_s=5.0)  # type: ignore[arg-type]
+            vcd_path, max_wait_s=1.0)  # type: ignore[arg-type]
     if not var_id_map:
         # No header arrived. Fall back to a simple countdown so the operator
-        # at least sees something happening.
+        # at least sees something happening — but pass should_stop so the
+        # countdown exits immediately if the capture subprocess has died
+        # (e.g. "No devices found" → status 1 in <100ms).
         warn("live dashboard: VCD header not found, falling back to countdown")
-        countdown_progress(duration_s, prefix="Capturing")
+        countdown_progress(duration_s, prefix="Capturing", should_stop=should_stop)
         return {"state": {}, "rising": {}, "falling": {}, "var_id_map": {},
                 "timescale_factor_ns": 1.0}
 
