@@ -1,0 +1,6 @@
+# Treat compressed VCDs as binary so git doesn't try to do line-based
+# diffs or textconv on them. Without this, every pull with a new
+# capture would generate a massive textual diff that's unreadable and
+# wastes CPU on the diff.
+captures/*.vcd.gz binary
+captures/*.raw    binary
