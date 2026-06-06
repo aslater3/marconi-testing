@@ -200,6 +200,8 @@ BUS_CENSUS = TestDef(
 
         {"type": "analyse", "id": "ana_all_boards", "kind": "bus_census",
          "params": {"reference": "cap_with_ad2"}},
+        {"type": "analyse", "id": "ana_all_boards_si", "kind": "signal_integrity",
+         "params": {}},
 
         {"type": "note", "id": "obs_all", "prompt": "Final observation — which board caused the most degradation?"},
     ],
@@ -248,6 +250,8 @@ CONTENTION = TestDef(
 
         {"type": "analyse", "id": "ana_contention", "kind": "contention",
          "params": {"suspect_channel": 0, "cs_channels": [1, 2, 3]}},
+        {"type": "analyse", "id": "ana_contention_si", "kind": "signal_integrity",
+         "params": {}},
 
         {"type": "note", "id": "obs", "prompt": "What did you observe (any clicks, pops, display glitches)?",
          "multiline": True},
@@ -1040,6 +1044,8 @@ AA2_ADDRESS_BUS = TestDef(
 
         {"type": "analyse", "id": "ana_address_bus", "kind": "bus_census",
          "params": {"reference": "self"}},
+        {"type": "analyse", "id": "ana_address_bus_si", "kind": "signal_integrity",
+         "params": {}},
 
         {"type": "note", "id": "obs", "prompt": (
             "Examine the bus_census output:\n"
@@ -1113,6 +1119,8 @@ AA2_IC11_ALONE = TestDef(
 
         {"type": "analyse", "id": "ana_ic11_alone", "kind": "bus_census",
          "params": {"reference": "self"}},
+        {"type": "analyse", "id": "ana_ic11_alone_si", "kind": "signal_integrity",
+         "params": {}},
 
         {"type": "note", "id": "obs", "prompt": (
             "Interpret the bus_census output:\n"

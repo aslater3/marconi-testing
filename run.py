@@ -22,7 +22,8 @@ from harness.capture import capture as do_capture, _check_hardware
 from harness.report import Report
 from harness.analysis import (analyse_bus_census, analyse_contention, analyse_diff,
                               analyse_n_way_diff, analyse_analogue_vs_code,
-                              analyse_bus_e2e, analyse_clock_health)
+                              analyse_bus_e2e, analyse_clock_health,
+                              analyse_signal_integrity)
 
 
 HARNESS_DIR = Path(__file__).parent.resolve()
@@ -179,6 +180,8 @@ def _execute_step(step: dict, step_num: int, total: int, report: Report,
                 result = analyse_bus_e2e(captures, params_with_state)
             elif kind == "clock_health":
                 result = analyse_clock_health(captures, params)
+            elif kind == "signal_integrity":
+                result = analyse_signal_integrity(captures, params)
             else:
                 ui.warn(f"unknown analysis kind: {kind}")
                 return
@@ -204,6 +207,37 @@ def _execute_step(step: dict, step_num: int, total: int, report: Report,
                     s = result.get("summary", {})
                     print(f"    verdict: {ui.BOLD}{s.get('verdict', '?')}{ui.RESET}")
                     print(f"    {ui.DIM}{s}{ui.RESET}")
+            elif kind == "signal_integrity":
+                if result.get("skipped"):
+                    print(f"    {ui.YELLOW}⊘ skipped: {result.get('reason', '?')}{ui.RESET}")
+                else:
+                    s = result.get("summary", {})
+                    verdict = s.get("verdict", "?")
+                    verdict_color = (ui.GREEN if s.get("n_suspect", 0) == 0
+                                     and s.get("n_degraded", 0) == 0
+                                     else ui.RED if s.get("n_suspect", 0) > 0
+                                     else ui.YELLOW)
+                    print(f"    verdict: {verdict_color}{verdict}{ui.RESET}")
+                    print(f"    {ui.DIM}overall: {s.get('pct_sub100ns_overall', 0):.2f}% of all inter-edge intervals are sub-100ns{ui.RESET}")
+                    print()
+                    for ch_name, info in result.get("channels", {}).items():
+                        h = info.get("health", "?")
+                        color = (ui.GREEN if h == "ok"
+                                 else ui.RED if h == "suspect"
+                                 else ui.YELLOW)
+                        ch_num = info.get("channel", 0)
+                        pct = info.get("pct_sub100ns", 0.0)
+                        n_sub = info.get("n_sub100ns", 0)
+                        n_int = info.get("n_intervals", 0)
+                        med = info.get("median_gap_ns")
+                        min_g = info.get("min_gap_ns")
+                        min_str = f"{min_g}ns" if min_g is not None else "N/A"
+                        med_str = f"{med}ns" if med is not None else "N/A"
+                        print(f"    LA CH{ch_num+1} ({ch_name}): {color}{h}{ui.RESET}  "
+                              f"sub100ns={n_sub:>6,}/{n_int:>7,} ({pct:5.2f}%)  "
+                              f"min={min_str}  median={med_str}")
+                        if info.get("notes"):
+                            print(f"           {ui.DIM}{info['notes']}{ui.RESET}")
             elif kind == "clock_health":
                 v = result.get("verdict", "?")
                 mhz = (result.get("measured_hz") or 0) / 1e6

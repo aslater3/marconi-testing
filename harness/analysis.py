@@ -597,6 +597,139 @@ def analyse_bus_census(captures: dict[str, Capture], params: dict) -> dict:
 
 
 # -----------------------------------------------------------------------------
+# signal_integrity
+# -----------------------------------------------------------------------------
+
+def analyse_signal_integrity(captures: dict, params: dict) -> dict:
+    """Per-channel signal-integrity check based on inter-edge interval distribution.
+
+    The bus_census analyser counts edges but doesn't look at the *timing* of
+    those edges. A 24 MHz logic analyser samples at 41.67 ns intervals, so
+    a line that's oscillating faster than 24 MHz shows up as a stream of
+    back-to-back 0/1 transitions with 41 ns gaps — the "sub-sample-period
+    gap" aliasing signature. A healthy bus has a smooth distribution of
+    inter-edge intervals in the 100-1000 ns range.
+
+    This analyser reports per-channel:
+      - total edges, total intervals
+      - count and percentage of sub-100ns intervals (the aliasing tell)
+      - min/median/max gap in ns
+      - health verdict: ok / degraded / suspect
+
+    Verdicts:
+      ok        <5% sub-100ns intervals — clean signal
+      degraded  5-20% sub-100ns             — worth a scope check
+      suspect   >20% sub-100ns              — line is oscillating at >24 MHz,
+                                              almost certainly bus contention
+                                              or a failed output stage. Probe
+                                              with the scope for shark fin.
+
+    params:
+      (none currently — the analyser auto-iterates all channels of the
+      most recent capture, the same convention as bus_census)
+    """
+    out: dict[str, Any] = {
+        "kind": "signal_integrity",
+        "channels": {},
+        "summary": {"verdict": "ok", "n_channels": 0, "n_ok": 0,
+                    "n_degraded": 0, "n_suspect": 0},
+    }
+
+    # Guard: if no capture is available, return a clean skip rather than
+    # crashing on list(captures.values())[-1].
+    if not captures:
+        out["skipped"] = True
+        out["reason"] = "no capture available — prior capture step failed"
+        return out
+
+    cap = list(captures.values())[-1]
+    if not cap.vcd_path:
+        return out
+
+    n_sub100_total = 0
+    n_intervals_total = 0
+    n_ok = n_degraded = n_suspect = 0
+
+    for ch in cap.channels:
+        ch_key = f"ch{ch}"
+        trans = parse_vcd_transitions(cap.vcd_path, ch)
+        if len(trans) < 2:
+            out["channels"][ch_key] = {
+                "channel": ch,
+                "n_edges": len(trans),
+                "n_intervals": 0,
+                "n_sub100ns": 0,
+                "pct_sub100ns": 0.0,
+                "min_gap_ns": None,
+                "median_gap_ns": None,
+                "max_gap_ns": None,
+                "health": "ok",
+                "notes": "fewer than 2 edges — no intervals to analyse",
+            }
+            n_ok += 1
+            continue
+
+        ts = [t for t, _v in trans]
+        gaps = sorted(ts[i + 1] - ts[i] for i in range(len(ts) - 1))
+        n_intervals = len(gaps)
+        n_sub100 = sum(1 for g in gaps if g < 100)
+        n_intervals_total += n_intervals
+        n_sub100_total += n_sub100
+        pct = (n_sub100 / n_intervals) * 100.0 if n_intervals else 0.0
+        min_gap = gaps[0]
+        max_gap = gaps[-1]
+        median_gap = gaps[n_intervals // 2]
+
+        if pct >= 20.0:
+            health = "suspect"
+            notes = (f"{pct:.1f}% of intervals are sub-100ns — line is "
+                     f"oscillating at >24 MHz (LA sample rate). Probe with "
+                     f"the scope for shark fin shape.")
+            n_suspect += 1
+        elif pct >= 5.0:
+            health = "degraded"
+            notes = (f"{pct:.1f}% of intervals are sub-100ns — mild "
+                     f"aliasing. Worth a scope check on this signal.")
+            n_degraded += 1
+        else:
+            health = "ok"
+            notes = ""
+            n_ok += 1
+
+        out["channels"][ch_key] = {
+            "channel": ch,
+            "n_edges": len(trans),
+            "n_intervals": n_intervals,
+            "n_sub100ns": n_sub100,
+            "pct_sub100ns": round(pct, 2),
+            "min_gap_ns": min_gap,
+            "median_gap_ns": median_gap,
+            "max_gap_ns": max_gap,
+            "health": health,
+            "notes": notes,
+        }
+
+    n_channels = len(out["channels"])
+    if n_suspect > 0:
+        verdict = f"SUSPECT — {n_suspect} channel(s) oscillating at >24 MHz (bus contention signature)"
+    elif n_degraded > 0:
+        verdict = f"DEGRADED — {n_degraded} channel(s) showing mild aliasing"
+    else:
+        verdict = f"OK — all {n_channels} channel(s) clean"
+
+    out["summary"] = {
+        "verdict": verdict,
+        "n_channels": n_channels,
+        "n_ok": n_ok,
+        "n_degraded": n_degraded,
+        "n_suspect": n_suspect,
+        "pct_sub100ns_overall": round(
+            (n_sub100_total / n_intervals_total) * 100.0, 2
+        ) if n_intervals_total else 0.0,
+    }
+    return out
+
+# -----------------------------------------------------------------------------
 # contention
 # -----------------------------------------------------------------------------
 
