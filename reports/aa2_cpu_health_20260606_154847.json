@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "test": "aa2_cpu_health",
+  "test_description": "AA2/1-only health check of the 8085 CPU (IC5). Probes CLK, ALE, /WR, /RD, S0, S1, and IO/M. Verifies the clock is at 3.072 MHz (within 5%) and that ALE and /WR are pulsing \u2014 proves the CPU is running and issuing bus cycles. No recipient-board access required.",
+  "operator": "andy",
+  "hostname": "andys-MacBook-Pro.local",
+  "started_at": "2026-06-06T14:47:56+00:00",
+  "finished_at": "2026-06-06T14:48:47+00:00",
+  "hardware": "fx2lafw 24MHz 8ch",
+  "captures": {},
+  "events": [
+    {
+      "t": "2026-06-06T14:48:16+00:00",
+      "step_id": "cap_cpu_health",
+      "type": "capture_error",
+      "error": "sigrok-cli timed out after 12.0s"
+    },
+    {
+      "t": "2026-06-06T14:48:16+00:00",
+      "step_id": "ana_cpu_health",
+      "type": "analysis_error",
+      "kind": "clock_health",
+      "error": "list index out of range"
+    },
+    {
+      "t": "2026-06-06T14:48:16+00:00",
+      "step_id": "ana_bus_health",
+      "type": "analysis_error",
+      "kind": "bus_census",
+      "error": "list index out of range"
+    },
+    {
+      "t": "2026-06-06T14:48:47+00:00",
+      "step_id": "obs",
+      "type": "note",
+      "operator_input": "none"
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {}
+}

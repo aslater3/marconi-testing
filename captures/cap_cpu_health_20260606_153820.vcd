@@ -1,0 +1,19 @@
+$date
+20260606_153820
+$end
+$version hermes-sigrok-bridge 0.1 $end
+$timescale 1 ns $end
+$scope module logic $end
+$var wire 1 a ch0 $end
+$var wire 1 b ch1 $end
+$var wire 1 c ch2 $end
+$var wire 1 d ch3 $end
+$var wire 1 e ch4 $end
+$var wire 1 f ch5 $end
+$var wire 1 g ch6 $end
+$var wire 1 h ch7 $end
+$upscope $end
+$enddefinitions $end
+#0
+#0
+1h

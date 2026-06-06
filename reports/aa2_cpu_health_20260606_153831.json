@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "test": "aa2_cpu_health",
+  "test_description": "AA2/1-only health check of the 8085 CPU (IC5). Probes CLK, ALE, /WR, /RD, S0, S1, and IO/M. Verifies the clock is at 3.072 MHz (within 5%) and that ALE and /WR are pulsing \u2014 proves the CPU is running and issuing bus cycles. No recipient-board access required.",
+  "operator": "andy",
+  "hostname": "andys-MacBook-Pro.local",
+  "started_at": "2026-06-06T14:38:20+00:00",
+  "finished_at": "2026-06-06T14:38:31+00:00",
+  "hardware": "simulate",
+  "captures": {
+    "cap_cpu_health": {
+      "name": "cap_cpu_health",
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "duration_s": 2.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": null,
+      "raw_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_cpu_health_20260606_153820.raw",
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_cpu_health_20260606_153820.vcd",
+      "captured_at": "20260606_153820",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=clean_strobe, scaled to 1000 samples for speed"
+    }
+  },
+  "events": [
+    {
+      "t": "2026-06-06T14:38:20+00:00",
+      "step_id": "cap_cpu_health",
+      "type": "capture",
+      "capture_id": "cap_cpu_health",
+      "mode": "simulate",
+      "duration_s": 2.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_cpu_health_20260606_153820.vcd"
+    },
+    {
+      "t": "2026-06-06T14:38:20+00:00",
+      "step_id": "ana_cpu_health",
+      "type": "analysis",
+      "kind": "clock_health",
+      "params": {
+        "channel": 0,
+        "expected_hz": 3072000,
+        "tolerance_pct": 5.0
+      },
+      "result": {
+        "kind": "clock_health",
+        "channel": 0,
+        "expected_hz": 3072000.0,
+        "measured_hz": null,
+        "n_rising_edges": 0,
+        "n_falling_edges": 0,
+        "period_ns": null,
+        "deviation_pct": null,
+        "verdict": "no edges seen"
+      }
+    },
+    {
+      "t": "2026-06-06T14:38:20+00:00",
+      "step_id": "ana_bus_health",
+      "type": "analysis",
+      "kind": "bus_census",
+      "params": {
+        "reference": "self"
+      },
+      "result": {
+        "kind": "bus_census",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 1,
+            "n_rising": 1,
+            "n_falling": 0,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          }
+        }
+      }
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {}
+}
