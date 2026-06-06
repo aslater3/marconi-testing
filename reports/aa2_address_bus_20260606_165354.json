@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "test": "aa2_address_bus",
+  "test_description": "AA2/1-only test of the address demuxer (IC21 74LS373). Probes Q0..Q4 outputs of IC21 alongside /WR, ALE, and CLK. Capture one Second Function 3 byte write; verify the latched address is stable during /WR LOW and that Q0..Q4 transition when /WR is asserted. AA2/1 only \u2014 no recipient boards touched.",
+  "operator": "andy",
+  "hostname": "andys-MacBook-Pro.local",
+  "started_at": "2026-06-06T15:47:29+00:00",
+  "finished_at": "2026-06-06T15:53:54+00:00",
+  "hardware": "fx2lafw 24MHz 8ch",
+  "captures": {
+    "cap_address_bus": {
+      "name": "cap_address_bus",
+      "sample_rate_hz": 24000000,
+      "n_samples": 120000000,
+      "duration_s": 5.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 0,
+        "edge": "falling"
+      },
+      "raw_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_address_bus_20260606_165222.raw",
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_address_bus_20260606_165222.vcd.gz",
+      "captured_at": "20260606_165222",
+      "mode": "hardware",
+      "notes": "captured via sigrok-cli fx2lafw (Saleae Logic 8ch/24MHz)"
+    }
+  },
+  "events": [
+    {
+      "t": "2026-06-06T15:52:53+00:00",
+      "step_id": "cap_address_bus",
+      "type": "capture",
+      "capture_id": "cap_address_bus",
+      "mode": "hardware",
+      "duration_s": 5.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 120000000,
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_address_bus_20260606_165222.vcd.gz"
+    },
+    {
+      "t": "2026-06-06T15:53:10+00:00",
+      "step_id": "ana_address_bus",
+      "type": "analysis",
+      "kind": "bus_census",
+      "params": {
+        "reference": "self"
+      },
+      "result": {
+        "kind": "bus_census",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 58591,
+            "n_rising": 29296,
+            "n_falling": 29295,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 736591,
+            "n_rising": 368295,
+            "n_falling": 368296,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 3136791,
+            "n_rising": 1568396,
+            "n_falling": 1568395,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 168524,
+            "n_rising": 84262,
+            "n_falling": 84262,
+            "first_state": 1,
+            "last_state": 0,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 258668,
+            "n_rising": 129334,
+            "n_falling": 129334,
+            "first_state": 0,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 400195,
+            "n_rising": 200098,
+            "n_falling": 200097,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 167281,
+            "n_rising": 83641,
+            "n_falling": 83640,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 392873,
+            "n_rising": 196437,
+            "n_falling": 196436,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          }
+        }
+      }
+    },
+    {
+      "t": "2026-06-06T15:53:54+00:00",
+      "step_id": "obs",
+      "type": "note",
+      "operator_input": "changed rf level up and down a few times"
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {}
+}
