@@ -43,6 +43,10 @@ automatically as long as the firmware is loaded.
 
 ## Tests
 
+The harness ships **13 tests** organised in two layers:
+
+**Layer 1 — Cross-board / recipient tests (clip AA2 + a recipient):**
+
 | Test | Purpose | Stages |
 |------|---------|--------|
 | `bus_census`              | Per-channel health check across all recipient boards | 1 (per-recipient) |
@@ -53,10 +57,49 @@ automatically as long as the firmware is loaded.
 | `dac_dmm_crosscheck`      | Cross-check AD7522LN digital inputs vs analog output | 4 (codes 0, 1024, 2048, 4095) |
 | `bus_e2e_cpu_to_ac4`      | **End-to-end CPU→AC4 pipeline verification** | 4 (CPU, buffer, decoder, DAC) |
 
-The `bus_e2e_cpu_to_ac4` test is the flagship health-check: it produces a
+**Layer 2 — AA2/1 single-board tests (clip only AA2/1 — the unit is stacked, so cross-board tests need disassembly):**
+
+| Test | Purpose | Key pins |
+|------|---------|----------|
+| `aa2_cpu_health`     | Verify the 8085 clock is in tolerance (3.072 MHz ±5%) and the control signals are alive | IC5 8085: CLK (37), ALE (30), /WR (31), /RD (32), S0 (29), S1 (33), IO/M (34) |
+| `aa2_address_bus`    | See the demuxed address bus on IC21 outputs | IC21 74LS373: Q0..Q4 + IC5 control |
+| `aa2_ic11_alone`     | View all 8 buffered address lines — the shark-fin localiser on IC11 74LS244 | IC11: Y0..Y7 |
+| `aa2_ic20_latch`     | Verify the (recently replaced) 74LS273 latch is healthy | IC20: CLK + D0..D4 |
+| `aa2_ic21_latch`     | View the full 8 demuxer inputs of IC21 74LS373 | IC21: D0..D7 |
+| `aa2_ic10_xcvr`      | Verify the 74LS245 transceiver direction and the write qualifier | IC10: DIR, /OE, A0..A3 + IC5 /WR, ALE |
+
+The Layer 1 `bus_e2e_cpu_to_ac4` test is the flagship health-check: it produces a
 stage-by-stage verdict table that pinpoints which stage of the canonical
 4-stage pipeline (8085 → 74LS245/244 → AC3/ACL3 IC1 74LS138 → AD7522)
 the bus transaction first goes wrong.
+
+The Layer 2 tests are the **first line of attack** when the 2019A is
+stacked and you can't physically reach AA2 + a recipient at the same
+time. They let you characterise AA2/1 in isolation, rule out the CPU /
+latch / buffer on the motherboard, and only escalate to the cross-board
+Layer 1 tests when AA2 has been cleared.
+
+## Analysers
+
+| Analyser | Use case |
+|----------|----------|
+| `analyse_bus_census`      | Per-channel edge count and activity (default for most tests) |
+| `analyse_contention`      | Find near-simultaneous transitions on the 'C' line vs chip-selects |
+| `analyse_diff`            | First divergence between a good and a bad capture |
+| `analyse_n_way_diff`      | N-way diff with per-channel `expect_levels` table |
+| `analyse_analogue_vs_code` | DMM reading vs expected voltage for a given DAC code |
+| `analyse_bus_e2e`         | 4-stage verdict table for the CPU→AC4 pipeline |
+| `analyse_clock_health`    | **New** — counts rising edges on a designated channel, divides by elapsed time, and reports within-tolerance / OUT OF TOLERANCE vs an expected Hz. Used by `aa2_cpu_health` to verify the 8085's 3.072 MHz `CLK OUT` is healthy. |
+
+## Live capture dashboard
+
+During a real hardware capture the harness now streams sigrok-cli's
+stdout into an in-memory `LiveBuffer` and renders a **5-second live
+dashboard** while the capture is in progress — per-channel ASCII bars,
+edge counters ticking up, last-seen transition age. When the capture
+finishes, the analysers run on the same buffer. No GUI deps; pure
+ANSI-colour terminal output. Implemented in `harness/ui.py` as
+`LiveBuffer` + `live_capture_progress(live_buffer=...)`.
 
 ## Layout
 
@@ -64,11 +107,11 @@ the bus transaction first goes wrong.
 marconi-test-harness/
 ├── run.py                # entry point
 ├── harness/
-│   ├── analysis.py       # bus_census, contention, diff, n_way_diff, analogue_vs_code, bus_e2e
+│   ├── ui.py             # terminal dashboard, prompts, LiveBuffer, live_capture_progress
 │   ├── capture.py        # sigrok wrapper, VCD parser (handles both sim and sigrok VCD), synthetic VCD
 │   ├── report.py         # per-test JSON report builder
-│   ├── tests.py          # test definitions
-│   └── ui.py             # terminal dashboard
+│   ├── tests.py          # test definitions (13 tests in two layers)
+│   └── analysis.py       # bus_census, contention, diff, n_way_diff, analogue_vs_code, bus_e2e, clock_health
 ├── captures/             # raw VCDs (gitignored, one per capture step)
 ├── reports/              # per-test JSON (gitignored, one per test run)
 ├── tests/                # future saved captures for regression testing
