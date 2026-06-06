@@ -1265,6 +1265,8 @@ AA2_IC21_LATCH = TestDef(
 
         {"type": "analyse", "id": "ana_ic21_latch", "kind": "bus_census",
          "params": {"reference": "self"}},
+        {"type": "analyse", "id": "ana_ic21_latch_si", "kind": "signal_integrity",
+         "params": {}},
 
         {"type": "note", "id": "obs", "prompt": (
             "Interpret:\n"
