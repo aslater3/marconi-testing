@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "test": "aa2_ic21_latch",
+  "test_description": "AA2/1-only 8-channel view of IC21 (74LS373) D inputs from the 8085's multiplexed AD0..AD7 bus. The D inputs carry address bits during the first half of every bus cycle (when ALE is HIGH) and data bits during the second half. Bus_census reports per-channel activity. AA2/1 only \u2014 no recipient boards touched.",
+  "operator": "andy",
+  "hostname": "andys-MacBook-Pro.local",
+  "started_at": "2026-06-06T17:50:01+00:00",
+  "finished_at": "2026-06-06T17:50:57+00:00",
+  "hardware": "fx2lafw 24MHz 8ch",
+  "captures": {},
+  "events": [
+    {
+      "t": "2026-06-06T17:50:47+00:00",
+      "step_id": "cap_ic21_latch",
+      "type": "capture_error",
+      "error": "[Errno 28] No space left on device"
+    },
+    {
+      "t": "2026-06-06T17:50:47+00:00",
+      "step_id": "ana_ic21_latch",
+      "type": "analysis",
+      "kind": "bus_census",
+      "params": {
+        "reference": "self"
+      },
+      "result": {
+        "kind": "bus_census",
+        "channels": {},
+        "skipped": true,
+        "reason": "no capture available \u2014 prior capture step failed"
+      }
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {}
+}
