@@ -455,6 +455,109 @@ LS138_ISOLATION = TestDef(
 
 
 # -----------------------------------------------------------------------------
+# Test 4b: AA2/1 74LS138 Isolation (confirm/rule out a 74LS138 decoder on the
+#          mainboard as the source of the bus contention)
+# -----------------------------------------------------------------------------
+# Same control-vs-lifted-pin pattern as ls138_isolation, but targets the
+# AA2/1 mainboard's 74LS138 (which is IC13 or IC17 depending on the 2019A
+# board revision — the harness prompts the operator to confirm which).
+# The wiki's "IC11 is innocent" finding and the harness's cable-isolation
+# test have ruled out the ribbon cable path; the bus contention is on the
+# AA2/1 mainboard. The 74LS138 takes the latched address from IC21 and
+# generates AA2/1's local chip-selects; if one of its Y-outputs is stuck
+# or oscillating, it could be loading down the address bus internally.
+# -----------------------------------------------------------------------------
+AA2_LS138_ISOLATION = TestDef(
+    name="aa2_ls138_isolation",
+    description=(
+        "Non-invasive signal-integrity check of the AA2/1 on-board 74LS138 "
+        "(IC13 or IC17 — operator to confirm from PCB silkscreen). Probes "
+        "all 8 Y-outputs simultaneously and runs the signal-integrity "
+        "analyser on each. The bus contention signature (sub-100ns gaps, "
+        "aliasing of >24 MHz oscillation) on one or more Y-outputs while "
+        "the others are clean indicates a damaged 74LS138 output stage "
+        "that's loading the bus. The Y-outputs that show the fault are "
+        "the candidate for replacement."
+    ),
+    steps=[
+        {"type": "prompt", "id": "intro", "text": (
+            "=== AA2/1 74LS138 NON-INVASIVE ISOLATION ===\n"
+            "Hypothesis: the AA2/1 on-board 74LS138 (IC13 or IC17) has a\n"
+            "damaged Y-output that's loading the bus. The wiki's scope\n"
+            "trace showed negative-going spikes at ~4.31 kHz on a digital\n"
+            "signal — consistent with a misfiring 74LS138 Y-output.\n\n"
+            "PROBE MAP (all 8 channels on the 74LS138):\n"
+            "  LA CH1 (D0) → IC13/IC17.Pin15 /Y0\n"
+            "  LA CH2 (D1) → IC13/IC17.Pin14 /Y1\n"
+            "  LA CH3 (D2) → IC13/IC17.Pin13 /Y2\n"
+            "  LA CH4 (D3) → IC13/IC17.Pin12 /Y3\n"
+            "  LA CH5 (D4) → IC13/IC17.Pin11 /Y4\n"
+            "  LA CH6 (D5) → IC13/IC17.Pin10 /Y5\n"
+            "  LA CH7 (D6) → IC13/IC17.Pin9  /Y6\n"
+            "  LA CH8 (D7) → IC13/IC17.Pin7  /Y7\n\n"
+            "Plus, for context, also clip the address latch enable so we\n"
+            "know when the 138 is supposed to be doing what:\n"
+            "  (you can free up a channel by dropping one of the Y-outputs\n"
+            "  if 8 channels is too many clips)\n\n"
+            "Procedure (no pin lifting!):\n"
+            "  1) Confirm the 74LS138 IC reference (IC13 or IC17) from the\n"
+            "     PCB silkscreen\n"
+            "  2) Clip 8 channels on the 8 Y-outputs as above\n"
+            "  3) Power on, let the 2019A free-run for 5 seconds\n"
+            "  4) The signal-integrity analyser will report per-channel\n"
+            "     sub-100ns gap counts. A Y-output showing the bus-contention\n"
+            "     signature (similar to the D4 finding: 30-50% sub-100ns)\n"
+            "     while its siblings are clean (<5%) is the suspect.\n\n"
+            "Verdict:\n"
+            "  - One Y-output shows SUSPECT, others OK: that Y-output's\n"
+            "    totem-pole transistor is damaged. Replace the 74LS138.\n"
+            "  - All Y-outputs OK: 138 is innocent at its outputs. The\n"
+            "    bus contention is on the 138's input (Pin 3 = C address)\n"
+            "    or upstream of the 138.\n"
+            "  - Multiple Y-outputs show contention: the 138 has a shared\n"
+            "    fault (power, ground, or internal Vcc short). Replace it.\n\n"
+            "Press ENTER to begin."
+        ), "wait_for": "enter"},
+
+        {"type": "prompt", "id": "confirm_ic", "text": (
+            "Which 74LS138 IC are you testing? Enter 'IC13' or 'IC17' or\n"
+            "the actual reference shown on the silkscreen:"
+        ), "wait_for": "enter"},
+
+        {"type": "prompt", "id": "setup", "text": (
+            "SETUP:\n"
+            "  1) Power on, no button presses — let the 2019A free-run\n"
+            "  2) Verify all 8 Y-output probes are clipped and seated\n"
+            "  3) Press ENTER to capture 5 seconds of bus activity"
+        ), "wait_for": "enter"},
+
+        {"type": "capture", "id": "cap_ls138", "duration_s": 5.0,
+         "sample_rate_hz": 24_000_000, "channels": list(range(8)),
+         "trigger": None},
+
+        {"type": "analyse", "id": "ana_ls138_census", "kind": "bus_census",
+         "params": {"reference": "self"}},
+        {"type": "analyse", "id": "ana_ls138_si", "kind": "signal_integrity",
+         "params": {}},
+
+        {"type": "prompt", "id": "verdict", "text": (
+            "VERDICT — AA2/1 74LS138 ISOLATION:\n"
+            "Look at the signal-integrity verdict table. The 8 Y-outputs\n"
+            "should mostly be at 'ok' (<5% sub-100ns gaps). One or two\n"
+            "channels at 'suspect' (>20% sub-100ns) is the smoking gun.\n\n"
+            "Note which Y-output (CH1=Pin15 /Y0, CH2=Pin14 /Y1, etc.)\n"
+            "is the suspect. That's the output stage that's damaged.\n\n"
+            "Press ENTER to record the conclusion."
+        ), "wait_for": "enter"},
+
+        {"type": "note", "id": "verdict_note",
+         "prompt": "Verdict — which Y-output is suspect? (e.g. 'CH3 = /Y2' or 'all clean' or 'multiple'):",
+         "multiline": True},
+    ],
+)
+
+
+# -----------------------------------------------------------------------------
 # Test 5: 74LS273 Stuck-Bit Sequence (detect a latch that doesn't update)
 # -----------------------------------------------------------------------------
 LS273_SEQUENCE = TestDef(
@@ -1366,6 +1469,7 @@ REGISTRY: dict[str, TestDef] = {
     "aa2_ic20_latch": AA2_IC20_LATCH,
     "aa2_ic21_latch": AA2_IC21_LATCH,
     "aa2_ic10_xcvr": AA2_IC10_XCVR,
+    "aa2_ls138_isolation": AA2_LS138_ISOLATION,
 }
 
 
