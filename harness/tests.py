@@ -558,6 +558,122 @@ AA2_LS138_ISOLATION = TestDef(
 
 
 # -----------------------------------------------------------------------------
+# Test 4c: AA2/1 74LS138 Input Probe — which A/B/C input is unstable?
+# -----------------------------------------------------------------------------
+# Companion to aa2_ls138_isolation. The user has observed that IC13's inputs
+# are stable but IC17's inputs are "all over the place, TTL constantly
+# polling". This test probes IC13 or IC17's input pins (A, B, C, and the
+# three enables) directly with the LA and runs signal-integrity on each.
+#
+# The 74LS138 inputs are driven by the latched address bus (IC21 Q outputs)
+# for A/B/C, and by AA2/1's local control logic for the enables. If a single
+# input pin shows the bus-contention signature while the others are stable,
+# the fault is on the trace feeding that pin (or on the upstream driver
+# that's loading the bus).
+#
+# Non-invasive — just 8 LA clips on the 138's input pins.
+# -----------------------------------------------------------------------------
+AA2_LS138_INPUTS = TestDef(
+    name="aa2_ls138_inputs",
+    description=(
+        "Non-invasive signal-integrity check of the AA2/1 on-board 74LS138's "
+        "input pins (A, B, C select inputs and /G2A, /G2B, G1 enables). "
+        "Companion to aa2_ls138_isolation which checks the Y-outputs. The "
+        "user has observed that IC13's inputs are stable but IC17's inputs "
+        "are unstable ('all over the place, TTL constantly polling') — "
+        "this test identifies which specific input pin is the source."
+    ),
+    steps=[
+        {"type": "prompt", "id": "intro", "text": (
+            "=== AA2/1 74LS138 INPUT PROBE ===\n"
+            "Hypothesis: IC13's inputs are stable but IC17's inputs are\n"
+            "unstable. The latched address bus from IC21 should be feeding\n"
+            "both 138s with stable, slowly-changing address values. If one\n"
+            "138 sees 'TTL constantly polling' on its inputs, that 138's\n"
+            "input is loading the bus or the trace feeding it is broken.\n\n"
+            "74LS138 pinout:\n"
+            "  Pin 1 = A   (select input — from latched address)\n"
+            "  Pin 2 = B   (select input — from latched address)\n"
+            "  Pin 3 = C   (select input — from latched address)\n"
+            "  Pin 4 = /G2A (active-low enable)\n"
+            "  Pin 5 = /G2B (active-low enable)\n"
+            "  Pin 6 = G1  (active-high enable)\n"
+            "  Pin 8 = GND\n"
+            "  Pin 16 = Vcc\n\n"
+            "PROBE MAP (all 6 inputs + reference signals):\n"
+            "  LA CH1 (D0) → IC13/IC17.Pin1  A\n"
+            "  LA CH2 (D1) → IC13/IC17.Pin2  B\n"
+            "  LA CH3 (D2) → IC13/IC17.Pin3  C   (the 'C' address line)\n"
+            "  LA CH4 (D3) → IC13/IC17.Pin4  /G2A\n"
+            "  LA CH5 (D4) → IC13/IC17.Pin5  /G2B\n"
+            "  LA CH6 (D5) → IC13/IC17.Pin6  G1\n"
+            "  LA CH7 (D6) → IC5.Pin30       ALE (latch-enable reference)\n"
+            "  LA CH8 (D7) → IC21.Pin11      LE   (latch-enable on IC21 —\n"
+            "                                   verify it follows ALE)\n\n"
+            "Procedure:\n"
+            "  1) Confirm the 74LS138 IC reference (IC13 or IC17) from the\n"
+            "     PCB silkscreen\n"
+            "  2) Clip 8 LA probes as above\n"
+            "  3) Power on, let the 2019A free-run for 5 seconds\n"
+            "  4) bus_census + signal_integrity give per-pin verdicts\n\n"
+            "Expected on a healthy 138:\n"
+            "  - A, B, C: stable, one transition per bus cycle (synchronized\n"
+            "    to ALE falling). Sub-100ns% < 5%.\n"
+            "  - /G2A, /G2B, G1: stable enable levels (typically held at one\n"
+            "    logic level for the entire capture). Sub-100ns% ~ 0%.\n\n"
+            "Failure modes:\n"
+            "  - A, B, or C shows SUSPECT (>20% sub-100ns): that input is\n"
+            "    being loaded by something. The trace feeding it is the\n"
+            "    suspect — could be a damaged input on a downstream IC, a\n"
+            "    short to a neighbouring trace, or a leaky bus driver.\n"
+            "  - /G2A, /G2B, or G1 shows SUSPECT: the enable logic feeding\n"
+            "    the 138 is broken. The 138 is being spuriously enabled or\n"
+            "    disabled, causing the Y-outputs to glitch.\n"
+            "  - LE (IC21.Pin11) doesn't follow ALE: IC21's latch enable is\n"
+            "    broken. IC21 is stuck in transparent mode and the Q outputs\n"
+            "    are following the D inputs. Replace IC21.\n\n"
+            "Press ENTER to begin."
+        ), "wait_for": "enter"},
+
+        {"type": "prompt", "id": "confirm_ic", "text": (
+            "Which 74LS138 IC are you testing? Enter 'IC13' or 'IC17' or\n"
+            "the actual reference shown on the silkscreen:"
+        ), "wait_for": "enter"},
+
+        {"type": "prompt", "id": "setup", "text": (
+            "SETUP:\n"
+            "  1) Power on, no button presses — let the 2019A free-run\n"
+            "  2) Verify all 8 probes are clipped and seated\n"
+            "  3) Press ENTER to capture 5 seconds of bus activity"
+        ), "wait_for": "enter"},
+
+        {"type": "capture", "id": "cap_inputs", "duration_s": 5.0,
+         "sample_rate_hz": 24_000_000, "channels": list(range(8)),
+         "trigger": None},
+
+        {"type": "analyse", "id": "ana_inputs_census", "kind": "bus_census",
+         "params": {"reference": "self"}},
+        {"type": "analyse", "id": "ana_inputs_si", "kind": "signal_integrity",
+         "params": {}},
+
+        {"type": "prompt", "id": "verdict", "text": (
+            "VERDICT — AA2/1 74LS138 INPUT PROBE:\n"
+            "Look at the signal-integrity verdict table. The 6 inputs should\n"
+            "be at 'ok'. Identify which inputs (if any) show SUSPECT.\n\n"
+            "Note the verdict for IC21.LE (CH8, IC21.Pin11) — it should\n"
+            "match ALE (CH7, IC5.Pin30). If it doesn't, IC21's latch enable\n"
+            "is broken.\n\n"
+            "Press ENTER to record the conclusion."
+        ), "wait_for": "enter"},
+
+        {"type": "note", "id": "verdict_note",
+         "prompt": "Verdict — which input pin is suspect? (e.g. 'CH3 = C' or 'CH8 = LE doesn't follow ALE' or 'multiple' or 'all clean'):",
+         "multiline": True},
+    ],
+)
+
+
+# -----------------------------------------------------------------------------
 # Test 5: 74LS273 Stuck-Bit Sequence (detect a latch that doesn't update)
 # -----------------------------------------------------------------------------
 LS273_SEQUENCE = TestDef(
@@ -1470,6 +1586,7 @@ REGISTRY: dict[str, TestDef] = {
     "aa2_ic21_latch": AA2_IC21_LATCH,
     "aa2_ic10_xcvr": AA2_IC10_XCVR,
     "aa2_ls138_isolation": AA2_LS138_ISOLATION,
+    "aa2_ls138_inputs": AA2_LS138_INPUTS,
 }
 
 
