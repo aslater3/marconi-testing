@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "test": "aa2_ls138_isolation",
+  "test_description": "Non-invasive signal-integrity check of the AA2/1 on-board 74LS138 (IC13 or IC17 \u2014 operator to confirm from PCB silkscreen). Probes all 8 Y-outputs simultaneously and runs the signal-integrity analyser on each. The bus contention signature (sub-100ns gaps, aliasing of >24 MHz oscillation) on one or more Y-outputs while the others are clean indicates a damaged 74LS138 output stage that's loading the bus. The Y-outputs that show the fault are the candidate for replacement.",
+  "operator": "andy",
+  "hostname": "andys-MacBook-Pro.local",
+  "started_at": "2026-06-06T19:27:46+00:00",
+  "finished_at": "2026-06-06T19:38:14+00:00",
+  "hardware": "fx2lafw 24MHz 8ch",
+  "captures": {},
+  "events": [
+    {
+      "t": "2026-06-06T19:38:10+00:00",
+      "step_id": "cap_ls138",
+      "type": "capture_error",
+      "error": "sigrok-cli exited with status 1: No devices found."
+    },
+    {
+      "t": "2026-06-06T19:38:10+00:00",
+      "step_id": "ana_ls138_census",
+      "type": "analysis",
+      "kind": "bus_census",
+      "params": {
+        "reference": "self"
+      },
+      "result": {
+        "kind": "bus_census",
+        "channels": {},
+        "skipped": true,
+        "reason": "no capture available \u2014 prior capture step failed"
+      }
+    },
+    {
+      "t": "2026-06-06T19:38:10+00:00",
+      "step_id": "ana_ls138_si",
+      "type": "analysis",
+      "kind": "signal_integrity",
+      "params": {},
+      "result": {
+        "kind": "signal_integrity",
+        "channels": {},
+        "summary": {
+          "verdict": "ok",
+          "n_channels": 0,
+          "n_ok": 0,
+          "n_degraded": 0,
+          "n_suspect": 0
+        },
+        "skipped": true,
+        "reason": "no capture available \u2014 prior capture step failed"
+      }
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {}
+}

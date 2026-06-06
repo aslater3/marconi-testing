@@ -1,0 +1,265 @@
+{
+  "schema_version": 1,
+  "test": "aa2_ls138_isolation",
+  "test_description": "Non-invasive signal-integrity check of the AA2/1 on-board 74LS138 (IC13 or IC17 \u2014 operator to confirm from PCB silkscreen). Probes all 8 Y-outputs simultaneously and runs the signal-integrity analyser on each. The bus contention signature (sub-100ns gaps, aliasing of >24 MHz oscillation) on one or more Y-outputs while the others are clean indicates a damaged 74LS138 output stage that's loading the bus. The Y-outputs that show the fault are the candidate for replacement.",
+  "operator": "andy",
+  "hostname": "andys-MacBook-Pro.local",
+  "started_at": "2026-06-06T19:38:52+00:00",
+  "finished_at": "2026-06-06T19:40:48+00:00",
+  "hardware": "fx2lafw 24MHz 8ch",
+  "captures": {
+    "cap_ls138": {
+      "name": "cap_ls138",
+      "sample_rate_hz": 24000000,
+      "n_samples": 120000000,
+      "duration_s": 5.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": null,
+      "raw_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_ls138_20260606_203901.raw",
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_ls138_20260606_203901.vcd.gz",
+      "captured_at": "20260606_203901",
+      "mode": "hardware",
+      "notes": "captured via sigrok-cli fx2lafw (Saleae Logic 8ch/24MHz)"
+    }
+  },
+  "events": [
+    {
+      "t": "2026-06-06T19:39:09+00:00",
+      "step_id": "cap_ls138",
+      "type": "capture",
+      "capture_id": "cap_ls138",
+      "mode": "hardware",
+      "duration_s": 5.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 120000000,
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_ls138_20260606_203901.vcd.gz"
+    },
+    {
+      "t": "2026-06-06T19:39:33+00:00",
+      "step_id": "ana_ls138_census",
+      "type": "analysis",
+      "kind": "bus_census",
+      "params": {
+        "reference": "self"
+      },
+      "result": {
+        "kind": "bus_census",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 3620198,
+            "n_rising": 1810099,
+            "n_falling": 1810099,
+            "first_state": 0,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 33143,
+            "n_rising": 16572,
+            "n_falling": 16571,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 33263,
+            "n_rising": 16632,
+            "n_falling": 16631,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 3492498,
+            "n_rising": 1746249,
+            "n_falling": 1746249,
+            "first_state": 1,
+            "last_state": 0,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 849963,
+            "n_rising": 424982,
+            "n_falling": 424981,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 591875,
+            "n_rising": 295938,
+            "n_falling": 295937,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 6625,
+            "n_rising": 3313,
+            "n_falling": 3312,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 1,
+            "n_rising": 0,
+            "n_falling": 1,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "ok",
+            "notes": ""
+          }
+        }
+      }
+    },
+    {
+      "t": "2026-06-06T19:39:58+00:00",
+      "step_id": "ana_ls138_si",
+      "type": "analysis",
+      "kind": "signal_integrity",
+      "params": {},
+      "result": {
+        "kind": "signal_integrity",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 3620198,
+            "n_intervals": 3620197,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": 291,
+            "median_gap_ns": 958,
+            "max_gap_ns": 68958,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 33143,
+            "n_intervals": 33142,
+            "n_sub100ns": 17,
+            "pct_sub100ns": 0.05,
+            "min_gap_ns": 41,
+            "median_gap_ns": 958,
+            "max_gap_ns": 1145250,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 33263,
+            "n_intervals": 33262,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": 291,
+            "median_gap_ns": 1916,
+            "max_gap_ns": 1756584,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 3492498,
+            "n_intervals": 3492497,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": 291,
+            "median_gap_ns": 958,
+            "max_gap_ns": 136666,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 849963,
+            "n_intervals": 849962,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": 291,
+            "median_gap_ns": 959,
+            "max_gap_ns": 583375,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 591875,
+            "n_intervals": 591874,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": 291,
+            "median_gap_ns": 2625,
+            "max_gap_ns": 81375,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 6625,
+            "n_intervals": 6624,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": 291,
+            "median_gap_ns": 6833,
+            "max_gap_ns": 4693500,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 1,
+            "n_intervals": 0,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": null,
+            "median_gap_ns": null,
+            "max_gap_ns": null,
+            "health": "ok",
+            "notes": "fewer than 2 edges \u2014 no intervals to analyse"
+          }
+        },
+        "summary": {
+          "verdict": "OK \u2014 all 8 channel(s) clean",
+          "n_channels": 8,
+          "n_ok": 8,
+          "n_degraded": 0,
+          "n_suspect": 0,
+          "pct_sub100ns_overall": 0.0
+        }
+      }
+    },
+    {
+      "t": "2026-06-06T19:40:48+00:00",
+      "step_id": "verdict_note",
+      "type": "note",
+      "operator_input": "CH8 was connected to pin 4 G2A Enable"
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {}
+}
