@@ -1,0 +1,265 @@
+{
+  "schema_version": 1,
+  "test": "aa2_ic21_latch",
+  "test_description": "AA2/1-only 8-channel view of IC21 (74LS373) D inputs from the 8085's multiplexed AD0..AD7 bus. The D inputs carry address bits during the first half of every bus cycle (when ALE is HIGH) and data bits during the second half. Bus_census reports per-channel activity. AA2/1 only \u2014 no recipient boards touched.",
+  "operator": "andy",
+  "hostname": "andys-MacBook-Pro.local",
+  "started_at": "2026-06-06T18:20:41+00:00",
+  "finished_at": "2026-06-06T18:21:54+00:00",
+  "hardware": "fx2lafw 24MHz 8ch",
+  "captures": {
+    "cap_ic21_latch": {
+      "name": "cap_ic21_latch",
+      "sample_rate_hz": 24000000,
+      "n_samples": 120000000,
+      "duration_s": 5.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": null,
+      "raw_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_ic21_latch_20260606_192042.raw",
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_ic21_latch_20260606_192042.vcd.gz",
+      "captured_at": "20260606_192042",
+      "mode": "hardware",
+      "notes": "captured via sigrok-cli fx2lafw (Saleae Logic 8ch/24MHz)"
+    }
+  },
+  "events": [
+    {
+      "t": "2026-06-06T18:21:14+00:00",
+      "step_id": "cap_ic21_latch",
+      "type": "capture",
+      "capture_id": "cap_ic21_latch",
+      "mode": "hardware",
+      "duration_s": 5.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 120000000,
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_ic21_latch_20260606_192042.vcd.gz"
+    },
+    {
+      "t": "2026-06-06T18:21:27+00:00",
+      "step_id": "ana_ic21_latch",
+      "type": "analysis",
+      "kind": "bus_census",
+      "params": {
+        "reference": "self"
+      },
+      "result": {
+        "kind": "bus_census",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 896095,
+            "n_rising": 448048,
+            "n_falling": 448047,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 1083315,
+            "n_rising": 541657,
+            "n_falling": 541658,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 867,
+            "n_rising": 434,
+            "n_falling": 433,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 19421,
+            "n_rising": 9711,
+            "n_falling": 9710,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 100855,
+            "n_rising": 50428,
+            "n_falling": 50427,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 1073198,
+            "n_rising": 536599,
+            "n_falling": 536599,
+            "first_state": 0,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 1356214,
+            "n_rising": 678107,
+            "n_falling": 678107,
+            "first_state": 0,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 1097832,
+            "n_rising": 548916,
+            "n_falling": 548916,
+            "first_state": 0,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          }
+        }
+      }
+    },
+    {
+      "t": "2026-06-06T18:21:41+00:00",
+      "step_id": "ana_ic21_latch_si",
+      "type": "analysis",
+      "kind": "signal_integrity",
+      "params": {},
+      "result": {
+        "kind": "signal_integrity",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 896095,
+            "n_intervals": 896094,
+            "n_sub100ns": 1750,
+            "pct_sub100ns": 0.2,
+            "min_gap_ns": 41,
+            "median_gap_ns": 1292,
+            "max_gap_ns": 4542,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 1083315,
+            "n_intervals": 1083314,
+            "n_sub100ns": 883,
+            "pct_sub100ns": 0.08,
+            "min_gap_ns": 41,
+            "median_gap_ns": 959,
+            "max_gap_ns": 6166,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 867,
+            "n_intervals": 866,
+            "n_sub100ns": 433,
+            "pct_sub100ns": 50.0,
+            "min_gap_ns": 41,
+            "median_gap_ns": 906708,
+            "max_gap_ns": 23550000,
+            "health": "suspect",
+            "notes": "50.0% of intervals are sub-100ns \u2014 line is oscillating at >24 MHz (LA sample rate). Probe with the scope for shark fin shape."
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 19421,
+            "n_intervals": 19420,
+            "n_sub100ns": 9710,
+            "pct_sub100ns": 50.0,
+            "min_gap_ns": 41,
+            "median_gap_ns": 6750,
+            "max_gap_ns": 501000,
+            "health": "suspect",
+            "notes": "50.0% of intervals are sub-100ns \u2014 line is oscillating at >24 MHz (LA sample rate). Probe with the scope for shark fin shape."
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 100855,
+            "n_intervals": 100854,
+            "n_sub100ns": 49719,
+            "pct_sub100ns": 49.3,
+            "min_gap_ns": 41,
+            "median_gap_ns": 3167,
+            "max_gap_ns": 225750,
+            "health": "suspect",
+            "notes": "49.3% of intervals are sub-100ns \u2014 line is oscillating at >24 MHz (LA sample rate). Probe with the scope for shark fin shape."
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 1073198,
+            "n_intervals": 1073197,
+            "n_sub100ns": 4404,
+            "pct_sub100ns": 0.41,
+            "min_gap_ns": 41,
+            "median_gap_ns": 958,
+            "max_gap_ns": 7083,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 1356214,
+            "n_intervals": 1356213,
+            "n_sub100ns": 161193,
+            "pct_sub100ns": 11.89,
+            "min_gap_ns": 41,
+            "median_gap_ns": 667,
+            "max_gap_ns": 12375,
+            "health": "degraded",
+            "notes": "11.9% of intervals are sub-100ns \u2014 mild aliasing. Worth a scope check on this signal."
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 1097832,
+            "n_intervals": 1097831,
+            "n_sub100ns": 2245,
+            "pct_sub100ns": 0.2,
+            "min_gap_ns": 41,
+            "median_gap_ns": 917,
+            "max_gap_ns": 9459,
+            "health": "ok",
+            "notes": ""
+          }
+        },
+        "summary": {
+          "verdict": "SUSPECT \u2014 3 channel(s) oscillating at >24 MHz (bus contention signature)",
+          "n_channels": 8,
+          "n_ok": 4,
+          "n_degraded": 1,
+          "n_suspect": 3,
+          "pct_sub100ns_overall": 4.09
+        }
+      }
+    },
+    {
+      "t": "2026-06-06T18:21:54+00:00",
+      "step_id": "obs",
+      "type": "note",
+      "operator_input": "all cables disconnected"
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {}
+}
