@@ -132,22 +132,65 @@ def _check_sigrok() -> Optional[str]:
 
 def _check_hardware() -> bool:
     """Return True if a sigrok-compatible LA is connected."""
+    info = _check_hardware_detail()
+    return info["connected"]
+
+
+def _check_hardware_detail() -> dict:
+    """Return a dict describing the LA connection state.
+
+    Returns:
+        {
+            "sigrok_cli": str | None,   # path to sigrok-cli, or None
+            "connected": bool,           # True if a device was found
+            "driver": str | None,        # e.g. "fx2lafw", "saleae-logic2"
+            "description": str | None,   # human-readable: "Saleae Logic [S/N: XYZ] with 8 channels"
+            "channels": int | None,      # channel count if known
+            "error": str | None,         # any error from probing
+        }
+    """
+    out = {
+        "sigrok_cli": None,
+        "connected": False,
+        "driver": None,
+        "description": None,
+        "channels": None,
+        "error": None,
+    }
     sr = _check_sigrok()
     if not sr:
-        return False
+        out["error"] = "sigrok-cli not installed (sudo apt install sigrok-cli)"
+        return out
+    out["sigrok_cli"] = sr
     try:
-        out = subprocess.run([sr, "-L"], capture_output=True, text=True, timeout=5)
-        # The output lists drivers. Look for fx2lafw (24 MHz 8ch clones) or any driver with
-        # a connected device.
-        for line in out.stdout.splitlines():
-            if "fx2lafw" in line.lower() or "saleae" in line.lower():
-                if "with" in line.lower() or "connected" in line.lower():
-                    return True
-        # Also try detecting any device
-        out2 = subprocess.run([sr, "--scan"], capture_output=True, text=True, timeout=5)
-        return bool(out2.stdout.strip())
-    except Exception:
-        return False
+        scan = subprocess.run([sr, "--scan"], capture_output=True, text=True, timeout=5)
+    except Exception as e:
+        out["error"] = f"sigrok-cli --scan failed: {e}"
+        return out
+    if scan.returncode != 0:
+        out["error"] = f"sigrok-cli --scan exited {scan.returncode}: {scan.stderr.strip()}"
+        return out
+    # Each non-empty line of `--scan` output is "driver:conn=... - description"
+    for line in scan.stdout.splitlines():
+        line = line.strip()
+        if not line or line.startswith("The following"):
+            continue
+        # Format: "fx2lafw:conn=1-4 - Saleae Logic [S/N: 0001] with 8 channels"
+        if " - " in line:
+            driver_part, desc = line.split(" - ", 1)
+            driver = driver_part.split(":", 1)[0].strip()
+            out["connected"] = True
+            out["driver"] = driver
+            out["description"] = desc.strip()
+            # Try to extract channel count from description
+            import re
+            m = re.search(r"(\d+)\s+channels?", desc, re.IGNORECASE)
+            if m:
+                out["channels"] = int(m.group(1))
+            break
+    if not out["connected"]:
+        out["error"] = "no LA detected (plug in the Saleae/clone and check plugdev group)"
+    return out
 
 
 # -----------------------------------------------------------------------------

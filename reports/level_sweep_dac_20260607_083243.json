@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "test": "level_sweep_dac",
+  "test_description": "Per-IC protocol decode for the AD7522LN DAC during a +7 dBm \u2192 -5 dBm level sweep. Probes LB, HB, LDAC, and 5 data bits (DB3..DB7). The protocol_decode analyser samples the 5-bit data bus on each LB rising edge, decodes the low-byte value being requested, and reports whether each level change carried the expected code. Use this on AC4 IC6.",
+  "operator": "andy",
+  "hostname": "andy-X570-AORUS-ELITE",
+  "started_at": "2026-06-07T07:32:43+00:00",
+  "finished_at": "2026-06-07T07:32:43+00:00",
+  "hardware": "dry_run",
+  "captures": {
+    "cap_dac_sweep": {
+      "name": "cap_dac_sweep",
+      "sample_rate_hz": 24000000,
+      "n_samples": 0,
+      "duration_s": 15.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 0,
+        "edge": "rising"
+      },
+      "raw_path": "/home/andy/marconi-test-harness/captures/cap_dac_sweep_20260607_083243.raw",
+      "vcd_path": null,
+      "captured_at": "20260607_083243",
+      "mode": "dry_run",
+      "notes": "dry-run: no capture performed"
+    }
+  },
+  "events": [
+    {
+      "t": "2026-06-07T07:32:43+00:00",
+      "step_id": "clip_dac",
+      "type": "clip",
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "probes": {
+        "0": "AD7522.Pin24  LB   (low byte strobe \u2014 event trigger)",
+        "1": "AD7522.Pin25  HB   (high byte strobe)",
+        "2": "AD7522.Pin21  LDAC (transfer to DAC register)",
+        "3": "AD7522.Pin15  DB4",
+        "4": "AD7522.Pin14  DB5",
+        "5": "AD7522.Pin13  DB6",
+        "6": "AD7522.Pin12  DB7  (MSB of low byte)",
+        "7": "AD7522.Pin16  DB3"
+      },
+      "text": "Clip the channels:"
+    },
+    {
+      "t": "2026-06-07T07:32:43+00:00",
+      "step_id": "cap_dac_sweep",
+      "type": "capture",
+      "capture_id": "cap_dac_sweep",
+      "mode": "dry_run",
+      "duration_s": 15.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 0,
+      "vcd_path": null
+    },
+    {
+      "t": "2026-06-07T07:32:43+00:00",
+      "step_id": "ana_census",
+      "type": "analysis",
+      "kind": "bus_census",
+      "params": {
+        "reference": "self"
+      },
+      "result": {
+        "kind": "bus_census",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          }
+        }
+      }
+    },
+    {
+      "t": "2026-06-07T07:32:43+00:00",
+      "step_id": "ana_si",
+      "type": "analysis",
+      "kind": "signal_integrity",
+      "params": {},
+      "result": {
+        "kind": "signal_integrity",
+        "channels": {},
+        "summary": {
+          "verdict": "ok",
+          "n_channels": 0,
+          "n_ok": 0,
+          "n_degraded": 0,
+          "n_suspect": 0
+        }
+      }
+    },
+    {
+      "t": "2026-06-07T07:32:43+00:00",
+      "step_id": "ana_decode",
+      "type": "analysis_error",
+      "kind": "protocol_decode",
+      "error": "name 'analyse_protocol_decode' is not defined"
+    },
+    {
+      "t": "2026-06-07T07:32:43+00:00",
+      "step_id": "obs",
+      "type": "note",
+      "operator_input": ""
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {}
+}

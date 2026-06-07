@@ -18,7 +18,8 @@ from pathlib import Path
 
 from harness import ui
 from harness.tests import list_tests, get_test
-from harness.capture import capture as do_capture, _check_hardware
+from harness.capture import (capture as do_capture, _check_hardware,
+                             _check_hardware_detail)
 from harness.report import Report
 from harness.analysis import (analyse_bus_census, analyse_contention, analyse_diff,
                               analyse_n_way_diff, analyse_analogue_vs_code,
@@ -518,6 +519,21 @@ def main() -> int:
 
     # Interactive menu
     ui.banner("Marconi 2019A Test Harness")
+
+    # Probe hardware once at startup so the operator can see what sigrok
+    # sees before choosing a mode. Hardware mode only works if a device is
+    # actually connected — we don't hide that.
+    hw = _check_hardware_detail()
+    if hw["connected"]:
+        ch_str = f"{hw['channels']} channels" if hw["channels"] else "channels"
+        print(f"  {ui.GREEN}●{ui.RESET}  {ui.BOLD}Hardware detected:{ui.RESET} "
+              f"{hw['description']}")
+        print(f"      {ui.DIM}driver={hw['driver']}  {ch_str}  sigrok-cli={hw['sigrok_cli']}{ui.RESET}")
+    else:
+        print(f"  {ui.RED}●{ui.RESET}  {ui.BOLD}No hardware detected:{ui.RESET} {hw['error']}")
+        print(f"      {ui.DIM}sigrok-cli={hw['sigrok_cli'] or 'not installed'}{ui.RESET}")
+    print()
+
     ui.info("Mode selection:")
     print(f"  {ui.BOLD}1{ui.RESET}) hardware (real LA, needs sigrok-cli + connected device)")
     print(f"  {ui.BOLD}2{ui.RESET}) dry-run (no hardware, walk through prompts)")
@@ -525,6 +541,14 @@ def main() -> int:
     print()
     mode_choice = ui.prompt_choice("Mode:", ["hardware", "dry-run", "simulate"])
     mode = ["hardware", "dry_run", "simulate"][mode_choice]
+
+    # If they picked hardware but nothing's connected, warn and let them
+    # bail out (or continue into a doomed run if they really want to).
+    if mode == "hardware" and not hw["connected"]:
+        print()
+        ui.warn(f"hardware mode selected but {hw['error']}")
+        if not ui.prompt_yesno("Continue anyway?", default=False):
+            return 1
 
     tests = list_tests()
     key = ui.list_tests_menu(tests)
