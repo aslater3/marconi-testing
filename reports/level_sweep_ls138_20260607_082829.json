@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "test": "level_sweep_ls138",
+  "test_description": "Per-IC protocol decode for a 74LS138 (3-to-8 decoder) during a +7 dBm \u2192 -5 dBm level sweep. All 8 /Y outputs probed. The protocol_decode analyser reports which /Y fired and when, so a stuck or missing /Y output is visible. Use this for AD4 IC1 (the prime suspect), AA2/1 IC13, AA2/1 IC17, or any AC13 '138.",
+  "operator": "andy",
+  "hostname": "andys-MacBook-Pro.local",
+  "started_at": "2026-06-07T07:26:17+00:00",
+  "finished_at": "2026-06-07T07:28:29+00:00",
+  "hardware": "fx2lafw 24MHz 8ch",
+  "captures": {},
+  "events": [
+    {
+      "t": "2026-06-07T07:28:24+00:00",
+      "step_id": "clip_ls138",
+      "type": "clip",
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "probes": {
+        "0": "74LS138.Pin15  /Y0",
+        "1": "74LS138.Pin14  /Y1",
+        "2": "74LS138.Pin13  /Y2",
+        "3": "74LS138.Pin12  /Y3",
+        "4": "74LS138.Pin11  /Y4",
+        "5": "74LS138.Pin10  /Y5",
+        "6": "74LS138.Pin9   /Y6",
+        "7": "74LS138.Pin7   /Y7"
+      },
+      "text": "Clip the channels:"
+    },
+    {
+      "t": "2026-06-07T07:28:24+00:00",
+      "step_id": "cap_ls138_sweep",
+      "type": "capture_error",
+      "error": "sigrok-cli exited with status 1: No devices found."
+    },
+    {
+      "t": "2026-06-07T07:28:24+00:00",
+      "step_id": "ana_census",
+      "type": "analysis",
+      "kind": "bus_census",
+      "params": {
+        "reference": "self"
+      },
+      "result": {
+        "kind": "bus_census",
+        "channels": {},
+        "skipped": true,
+        "reason": "no capture available \u2014 prior capture step failed"
+      }
+    },
+    {
+      "t": "2026-06-07T07:28:24+00:00",
+      "step_id": "ana_si",
+      "type": "analysis",
+      "kind": "signal_integrity",
+      "params": {},
+      "result": {
+        "kind": "signal_integrity",
+        "channels": {},
+        "summary": {
+          "verdict": "ok",
+          "n_channels": 0,
+          "n_ok": 0,
+          "n_degraded": 0,
+          "n_suspect": 0
+        },
+        "skipped": true,
+        "reason": "no capture available \u2014 prior capture step failed"
+      }
+    },
+    {
+      "t": "2026-06-07T07:28:24+00:00",
+      "step_id": "ana_decode",
+      "type": "analysis_error",
+      "kind": "protocol_decode",
+      "error": "name 'analyse_protocol_decode' is not defined"
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {}
+}
