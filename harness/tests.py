@@ -1878,6 +1878,8 @@ LEVEL_SWEEP_DAC = TestDef(
              "mode": "clock_edge",
              "clock_channel": 0,
              "data_channels": {6: 3, 5: 4, 4: 5, 3: 6, 7: 7},
+             "sample_point": "after",
+             "sample_offset_ns": 100,
              "signed": False,
          }},
 

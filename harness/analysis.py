@@ -1176,9 +1176,34 @@ def analyse_protocol_decode(captures: dict, params: dict) -> dict:
 
     # Walk the events and decode the bus at each
     decoded_events = []
+    # Where to sample relative to the clock/strobe edge:
+    #   "before" (default) — 1 ns before the rising edge. Right for
+    #     synchronous buses where the source clocks data out before
+    #     asserting the strobe.
+    #   "after" — N ns after the rising edge. Right for the Marconi
+    #     2019A where the data bus is shared with other address-decoded
+    #     writes and doesn't settle until after the strobe rises.
+    #   "stable" — sample at the midpoint of the strobe high window.
+    sample_point = params.get("sample_point", "before")  # before/after/stable
+    sample_offset_ns = int(params.get("sample_offset_ns", 1))
     for idx, (t, _src) in enumerate(events):
-        # Sample the bus *just before* the rising clock edge
-        sample_t = max(0, t - 1)  # 1 ns before the edge is safe enough
+        if sample_point == "before":
+            sample_t = max(0, t - sample_offset_ns)
+        elif sample_point == "after":
+            sample_t = t + sample_offset_ns
+        elif sample_point == "stable":
+            # Midpoint between this event and the next (or +100 ns for last)
+            # Will be set per-event below.
+            sample_t = t  # placeholder; overridden in stable loop
+            # Find next event of the same kind
+            for j in range(idx + 1, len(events)):
+                if events[j][1] == _src:
+                    sample_t = (t + events[j][0]) // 2
+                    break
+            else:
+                sample_t = t + 100  # 10 ns default for last event
+        else:
+            sample_t = max(0, t - sample_offset_ns)
         state = _state_at(trans_by_ch, sample_t)
         unsigned, signed_v = _bits_to_value(state, data_chs, invert)
         n_bits = (max(data_chs.keys()) + 1) if data_chs else 0
