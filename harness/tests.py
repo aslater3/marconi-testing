@@ -1809,27 +1809,33 @@ LEVEL_SWEEP_DAC = TestDef(
             "Probe LB, HB, LDAC, and 5 of 8 data bits. At each level\n"
             "change, the CPU issues an LB strobe with new data — the\n"
             "analyser samples the 5-bit slice and reports the value.\n\n"
-            "PROBE MAP (per wiki dac-bit-and-latch-verification.md):\n"
+            "PROBE MAP (per AD7522 datasheet, Analog Devices 25764808ad7522.pdf):\n"
             "  LA CH1 (D0) → AD7522.Pin24  LB   (event trigger)\n"
             "  LA CH2 (D1) → AD7522.Pin25  HB   (qualifier — must follow LB)\n"
             "  LA CH3 (D2) → AD7522.Pin21  LDAC (qualifier — must follow HB)\n"
-            "  LA CH4 (D3) → AD7522.Pin15  DB4  (data bit 4)\n"
+            "  LA CH4 (D3) → AD7522.Pin15  DB6  (data bit 6)\n"
             "  LA CH5 (D4) → AD7522.Pin14  DB5  (data bit 5)\n"
-            "  LA CH6 (D5) → AD7522.Pin13  DB6  (data bit 6)\n"
-            "  LA CH7 (D6) → AD7522.Pin12  DB7  (data bit 7 — MSB of low byte)\n"
-            "  LA CH8 (D7) → AD7522.Pin16  DB3  (data bit 3)\n\n"
-            "NOTE: this captures a 5-bit slice (DB3..DB7) of the low byte.\n"
-            "For the full 10-bit decode, use Second Function 3 (manual\n"
-            "mode) per dac-bit-and-latch-verification.md. This test tells\n"
-            "you the bus is requesting values at the right moments.\n\n"
+            "  LA CH6 (D5) → AD7522.Pin13  DB4  (data bit 4)\n"
+            "  LA CH7 (D6) → AD7522.Pin12  DB3  (data bit 3 — LSB of slice)\n"
+            "  LA CH8 (D7) → AD7522.Pin16  DB7  (data bit 7 — MSB of low byte)\n\n"
+            "NOTE: the DB3..DB7 pins are physically contiguous on the\n"
+            "AD7522 (pins 12-16), which is why we picked this 5-bit\n"
+            "slice. The labels in this probe map match the official\n"
+            "Analog Devices datasheet pinout. For the full 10-bit decode,\n"
+            "use Second Function 3 (manual mode) per\n"
+            "dac-bit-and-latch-verification.md. This test tells you the\n"
+            "bus is requesting values at the right moments.\n\n"
             "PROTOCOL:\n"
-            "  1) Clip LA channels to AC4 IC6 per the wiki.\n"
-            "  2) GND clip on AC4 GND (Pin 7 = DGND).\n"
+            "  1) Clip LA channels to AC4 IC6 per the probe map above.\n"
+            "  2) GND clip on AC4 GND (Pin 8 = AGND per datasheet, or\n"
+            "     Pin 7 = IOUT2 area ground — both work).\n"
             "  3) Set RF level to +7 dBm, wait 8 s.\n"
             "  4) Press ENTER to start the 15 s LA capture.\n"
             "  5) Walk the sweep: press RF LEVEL ▼ once per second\n"
             "     for 12 s, dropping +7 → +6 → ... → -5 dBm.\n"
-            "  6) Wait for LA capture to end.\n\n"
+            "  6) Wait for LA capture to end.\n"
+            "  7) DO NOT clip the LA's CLK pin — it carries 48 MHz that\n"
+            "     couples into other channels and corrupts measurements.\n\n"
             "Press ENTER to begin."
         ), "wait_for": "enter"},
 
@@ -1839,11 +1845,11 @@ LEVEL_SWEEP_DAC = TestDef(
              0: "AD7522.Pin24  LB   (low byte strobe — event trigger)",
              1: "AD7522.Pin25  HB   (high byte strobe)",
              2: "AD7522.Pin21  LDAC (transfer to DAC register)",
-             3: "AD7522.Pin15  DB4",
+             3: "AD7522.Pin15  DB6",
              4: "AD7522.Pin14  DB5",
-             5: "AD7522.Pin13  DB6",
-             6: "AD7522.Pin12  DB7  (MSB of low byte)",
-             7: "AD7522.Pin16  DB3",
+             5: "AD7522.Pin13  DB4",
+             6: "AD7522.Pin12  DB3  (LSB of probed slice)",
+             7: "AD7522.Pin16  DB7  (MSB of low byte)",
          },
          "wait_for": "enter"},
 
@@ -1858,15 +1864,15 @@ LEVEL_SWEEP_DAC = TestDef(
         {"type": "analyse", "id": "ana_si", "kind": "signal_integrity",
          "params": {}},
 
-        # protocol_decode: rising LB edges are the events, HB is the
-        # enable filter (must follow LB within a few µs — no enable
-        # filter set, we want to see all LB events regardless). 5-bit
-        # data bus on LA CH4..CH8 = bits 3..7.
+        # protocol_decode: rising LB edges are the events. 5-bit data bus
+        # on LA CH3..CH7 = bits 6/5/4/3/7 (per the datasheet-corrected
+        # pinout — CH3 is physically DB6, CH4 is DB5, etc., and CH7 is
+        # DB7 because pin 16 is the only DB7 on the chip).
         {"type": "analyse", "id": "ana_decode", "kind": "protocol_decode",
          "params": {
              "mode": "clock_edge",
              "clock_channel": 0,
-             "data_channels": {3: 3, 4: 4, 5: 5, 6: 6, 7: 7},
+             "data_channels": {3: 6, 4: 5, 5: 4, 6: 3, 7: 7},
              "signed": False,
          }},
 
@@ -1874,18 +1880,25 @@ LEVEL_SWEEP_DAC = TestDef(
             "INTERPRET:\n"
             "  - n_events = number of LB rising edges in 15 s. Expected: ~12.\n"
             "  - Each event's 'hex' is the 5-bit data slice (DB7..DB3) being\n"
-            "    written. The actual full 10-bit DAC code is HB-A7L3*256 +\n"
-            "    LB-A7L2, but the LB values should monotonically change with\n"
-            "    each 1 dBm step in the sweep direction.\n"
-            "  - If n_events < 12 → CPU is not writing the DAC on every\n"
-            "    step → CPU/AC13 fault, or LDAC firing without LB.\n"
-            "  - HB and LDAC counts (from bus_census) should each be ~12.\n"
-            "    If HB count = 0 → high byte never written → 138 mis-decoding.\n"
-            "    If LDAC count = 0 → DAC register never updated → final\n"
+            "    written. The full 10-bit DAC code is HB*256 + LB_lowbyte,\n"
+            "    but the LB values should change with each 1 dBm step.\n"
+            "  - bus_census: CH1 (LB) and CH2 (HB) and CH3 (LDAC) should\n"
+            "    each show ~12 edges. CH4..CH8 (data) should show hundreds\n"
+            "    of edges during the 12 level transitions.\n"
+            "  - If LB count < 12 → CPU not writing the DAC on every step\n"
+            "    → CPU/AC13 fault, or LDAC firing without LB.\n"
+            "  - If HB count = 0 → high byte never written → 138 mis-decoding.\n"
+            "  - If LDAC count = 0 → DAC register never updated → final\n"
             "    analog output is stale.\n"
-            "  - signal_integrity verdict on CH1 (LB): if 'suspect' →\n"
-            "    LB has sub-100ns oscillation = bus contention on the LB\n"
-            "    line. The original shark-fin fault mode.\n\n"
+            "  - signal_integrity on CH1 (LB): 'suspect' means sub-100ns\n"
+            "    oscillation = bus contention on the LB line. The original\n"
+            "    shark-fin fault mode.\n"
+            "  - signal_integrity on CH2 (HB): same diagnostic. Your scope\n"
+            "    showed a 'thin spike followed by proper TTL pulse' on HB —\n"
+            "    the LA should see the same spike as multiple rapid edges.\n"
+            "  - WARNING: if you accidentally clipped the LA's CLK pin, all\n"
+            "    channels will show inflated edge counts from 48 MHz coupling.\n"
+            "    Don't do that.\n\n"
             "Free-text observation:"
         ), "multiline": True},
     ],

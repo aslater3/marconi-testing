@@ -24,7 +24,7 @@ from harness.report import Report
 from harness.analysis import (analyse_bus_census, analyse_contention, analyse_diff,
                               analyse_n_way_diff, analyse_analogue_vs_code,
                               analyse_bus_e2e, analyse_clock_health,
-                              analyse_signal_integrity)
+                              analyse_signal_integrity, analyse_protocol_decode)
 
 
 HARNESS_DIR = Path(__file__).parent.resolve()
