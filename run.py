@@ -521,29 +521,45 @@ def main() -> int:
     ui.banner("Marconi 2019A Test Harness")
 
     # Probe hardware once at startup so the operator can see what sigrok
-    # sees before choosing a mode. Hardware mode only works if a device is
-    # actually connected — we don't hide that.
+    # sees before choosing a mode. Hardware mode only works if a real
+    # device (not sigrok's built-in `demo` source) is actually connected.
     hw = _check_hardware_detail()
     if hw["connected"]:
         ch_str = f"{hw['channels']} channels" if hw["channels"] else "channels"
         print(f"  {ui.GREEN}●{ui.RESET}  {ui.BOLD}Hardware detected:{ui.RESET} "
               f"{hw['description']}")
         print(f"      {ui.DIM}driver={hw['driver']}  {ch_str}  sigrok-cli={hw['sigrok_cli']}{ui.RESET}")
+    elif hw.get("demo_present"):
+        print(f"  {ui.YELLOW}●{ui.RESET}  {ui.BOLD}Only sigrok demo device present:{ui.RESET} "
+              f"this is a built-in fake signal source, not a real LA.")
+        print(f"      {ui.DIM}Plug in the Saleae/clone before choosing 'hardware'.{ui.RESET}")
     else:
         print(f"  {ui.RED}●{ui.RESET}  {ui.BOLD}No hardware detected:{ui.RESET} {hw['error']}")
         print(f"      {ui.DIM}sigrok-cli={hw['sigrok_cli'] or 'not installed'}{ui.RESET}")
     print()
 
+    # Build the mode choices — disable option 1 if no real LA is connected.
+    hw_ok = hw["connected"]
+    hw_label_1 = (f"{ui.BOLD}1{ui.RESET}) hardware (real LA, needs sigrok-cli + connected device)"
+                  if hw_ok
+                  else f"{ui.DIM}1) hardware (disabled — no real LA connected){ui.RESET}")
     ui.info("Mode selection:")
-    print(f"  {ui.BOLD}1{ui.RESET}) hardware (real LA, needs sigrok-cli + connected device)")
+    print(f"  {hw_label_1}")
     print(f"  {ui.BOLD}2{ui.RESET}) dry-run (no hardware, walk through prompts)")
     print(f"  {ui.BOLD}3{ui.RESET}) simulate (synthetic captures, end-to-end test)")
     print()
-    mode_choice = ui.prompt_choice("Mode:", ["hardware", "dry-run", "simulate"])
-    mode = ["hardware", "dry_run", "simulate"][mode_choice]
 
-    # If they picked hardware but nothing's connected, warn and let them
-    # bail out (or continue into a doomed run if they really want to).
+    if hw_ok:
+        valid_choices = ["hardware", "dry-run", "simulate"]
+    else:
+        valid_choices = ["dry-run", "simulate"]
+    mode_choice = ui.prompt_choice("Mode:", valid_choices)
+    mode = valid_choices[mode_choice]
+    if mode == "dry-run":
+        mode = "dry_run"
+
+    # Belt-and-braces: if they somehow still got here with hardware mode
+    # but no real LA, warn and bail.
     if mode == "hardware" and not hw["connected"]:
         print()
         ui.warn(f"hardware mode selected but {hw['error']}")

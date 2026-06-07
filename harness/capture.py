@@ -170,7 +170,10 @@ def _check_hardware_detail() -> dict:
     if scan.returncode != 0:
         out["error"] = f"sigrok-cli --scan exited {scan.returncode}: {scan.stderr.strip()}"
         return out
-    # Each non-empty line of `--scan` output is "driver:conn=... - description"
+    # Identify which lines of `--scan` correspond to REAL hardware. The
+    # sigrok `demo` driver is a built-in fake signal source — it does not
+    # represent a connected logic analyser and must not be treated as
+    # detected hardware (it would let the operator pick a doomed mode).
     for line in scan.stdout.splitlines():
         line = line.strip()
         if not line or line.startswith("The following"):
@@ -179,6 +182,11 @@ def _check_hardware_detail() -> dict:
         if " - " in line:
             driver_part, desc = line.split(" - ", 1)
             driver = driver_part.split(":", 1)[0].strip()
+            if driver in ("demo",):
+                # Skip demo devices; record that we saw them so the menu
+                # can warn the operator but don't mark as connected.
+                out["demo_present"] = True
+                continue
             out["connected"] = True
             out["driver"] = driver
             out["description"] = desc.strip()
@@ -189,7 +197,10 @@ def _check_hardware_detail() -> dict:
                 out["channels"] = int(m.group(1))
             break
     if not out["connected"]:
-        out["error"] = "no LA detected (plug in the Saleae/clone and check plugdev group)"
+        if out.get("demo_present"):
+            out["error"] = "only sigrok demo device present (not a real LA)"
+        else:
+            out["error"] = "no LA detected (plug in the Saleae/clone and check plugdev group)"
     return out
 
 
