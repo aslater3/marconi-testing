@@ -1,0 +1,223 @@
+{
+  "schema_version": 1,
+  "test": "good_vs_bad_diff",
+  "test_description": "Capture a known-good DAC write, then capture a suspect one, and let the harness diff them sample-by-sample. The first divergence is your answer.",
+  "operator": "andy",
+  "hostname": "andy-X570-AORUS-ELITE",
+  "started_at": "2026-06-05T18:31:49+00:00",
+  "finished_at": "2026-06-05T18:31:51+00:00",
+  "hardware": "simulate",
+  "captures": {
+    "cap_good": {
+      "name": "cap_good",
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "duration_s": 1.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 5,
+        "edge": "rising"
+      },
+      "raw_path": "/home/andy/marconi-test-harness/captures/cap_good_20260605_193150.raw",
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_good_20260605_193150.vcd",
+      "captured_at": "20260605_193150",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=clean_strobe, scaled to 1000 samples for speed"
+    },
+    "cap_bad": {
+      "name": "cap_bad",
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "duration_s": 1.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 5,
+        "edge": "rising"
+      },
+      "raw_path": "/home/andy/marconi-test-harness/captures/cap_bad_20260605_193151.raw",
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_bad_20260605_193151.vcd",
+      "captured_at": "20260605_193151",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=clean_strobe, scaled to 1000 samples for speed"
+    }
+  },
+  "events": [
+    {
+      "t": "2026-06-05T18:31:49+00:00",
+      "step_id": "clip",
+      "type": "clip",
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "probes": {
+        "0": "AA2/1 IC11.Pin18 (bus 'C' address line)",
+        "1": "AA2/1 IC11.Pin16 (bus 'B' address line)",
+        "2": "AA2/1 IC11.Pin14 (bus 'A' address line)",
+        "3": "AC4 AD7522.Pin24 LB strobe (latch low byte)",
+        "4": "AC4 AD7522.Pin25 HB strobe (latch high byte)",
+        "5": "AC4 AD7522.Pin21 LDAC (load DAC)",
+        "6": "any CS line (e.g. AD4 IC1.Pin15 /Y0)",
+        "7": "any 10 dB step CS (e.g. AD2 IC2 7406 output)"
+      },
+      "text": "Clip 8 channels to the bus + strobes:"
+    },
+    {
+      "t": "2026-06-05T18:31:50+00:00",
+      "step_id": "cap_good",
+      "type": "capture",
+      "capture_id": "cap_good",
+      "mode": "simulate",
+      "duration_s": 1.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_good_20260605_193150.vcd"
+    },
+    {
+      "t": "2026-06-05T18:31:50+00:00",
+      "step_id": "good_voltage",
+      "type": "set_state",
+      "key": "good_tp2_voltage",
+      "value": ""
+    },
+    {
+      "t": "2026-06-05T18:31:50+00:00",
+      "step_id": "good_voltage",
+      "type": "set_state",
+      "key": "good_tp2_voltage",
+      "value": ""
+    },
+    {
+      "t": "2026-06-05T18:31:51+00:00",
+      "step_id": "cap_bad",
+      "type": "capture",
+      "capture_id": "cap_bad",
+      "mode": "simulate",
+      "duration_s": 1.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_bad_20260605_193151.vcd"
+    },
+    {
+      "t": "2026-06-05T18:31:51+00:00",
+      "step_id": "bad_voltage",
+      "type": "set_state",
+      "key": "bad_tp2_voltage",
+      "value": ""
+    },
+    {
+      "t": "2026-06-05T18:31:51+00:00",
+      "step_id": "bad_voltage",
+      "type": "set_state",
+      "key": "bad_tp2_voltage",
+      "value": ""
+    },
+    {
+      "t": "2026-06-05T18:31:51+00:00",
+      "step_id": "ana_diff",
+      "type": "analysis",
+      "kind": "diff",
+      "params": {
+        "a": "cap_good",
+        "b": "cap_bad"
+      },
+      "result": {
+        "kind": "diff",
+        "first_divergence": null,
+        "per_channel": {
+          "ch0": {
+            "channel": 0,
+            "n_transitions_a": 0,
+            "n_transitions_b": 0,
+            "first_divergence": null,
+            "count_diff": null
+          },
+          "ch1": {
+            "channel": 1,
+            "n_transitions_a": 0,
+            "n_transitions_b": 0,
+            "first_divergence": null,
+            "count_diff": null
+          },
+          "ch2": {
+            "channel": 2,
+            "n_transitions_a": 0,
+            "n_transitions_b": 0,
+            "first_divergence": null,
+            "count_diff": null
+          },
+          "ch3": {
+            "channel": 3,
+            "n_transitions_a": 0,
+            "n_transitions_b": 0,
+            "first_divergence": null,
+            "count_diff": null
+          },
+          "ch4": {
+            "channel": 4,
+            "n_transitions_a": 0,
+            "n_transitions_b": 0,
+            "first_divergence": null,
+            "count_diff": null
+          },
+          "ch5": {
+            "channel": 5,
+            "n_transitions_a": 0,
+            "n_transitions_b": 0,
+            "first_divergence": null,
+            "count_diff": null
+          },
+          "ch6": {
+            "channel": 6,
+            "n_transitions_a": 0,
+            "n_transitions_b": 0,
+            "first_divergence": null,
+            "count_diff": null
+          },
+          "ch7": {
+            "channel": 7,
+            "n_transitions_a": 1,
+            "n_transitions_b": 1,
+            "first_divergence": null,
+            "count_diff": null
+          }
+        }
+      }
+    },
+    {
+      "t": "2026-06-05T18:31:51+00:00",
+      "step_id": "obs",
+      "type": "note",
+      "operator_input": ""
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {
+    "good_tp2_voltage": "",
+    "bad_tp2_voltage": ""
+  }
+}

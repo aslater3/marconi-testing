@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "test": "aa2_ic11_alone",
+  "test_description": "AA2/1-only localiser for the 'C' line shark-fin fault. Probes all 8 Y outputs of IC11 (74LS244) \u2014 the address buffer that drives the bus downstream. The 'C' line is on Pin 18 (Y7). Cable-isolation test proved IC11 is healthy when its load is removed; this test re-checks with all boards in place, on AA2-side only, so you can decide whether the fault is on the AA2 side of IC11 or downstream. No cross-board clipping required.",
+  "operator": "andy",
+  "hostname": "andy-X570-AORUS-ELITE",
+  "started_at": "2026-06-05T22:47:50+00:00",
+  "finished_at": "2026-06-05T22:47:50+00:00",
+  "hardware": "simulate",
+  "captures": {
+    "cap_ic11_alone": {
+      "name": "cap_ic11_alone",
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "duration_s": 5.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": null,
+      "raw_path": "/home/andy/marconi-test-harness/captures/cap_ic11_alone_20260605_234750.raw",
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_ic11_alone_20260605_234750.vcd",
+      "captured_at": "20260605_234750",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=clean_strobe, scaled to 1000 samples for speed"
+    }
+  },
+  "events": [
+    {
+      "t": "2026-06-05T22:47:50+00:00",
+      "step_id": "cap_ic11_alone",
+      "type": "capture",
+      "capture_id": "cap_ic11_alone",
+      "mode": "simulate",
+      "duration_s": 5.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_ic11_alone_20260605_234750.vcd"
+    },
+    {
+      "t": "2026-06-05T22:47:50+00:00",
+      "step_id": "ana_ic11_alone",
+      "type": "analysis",
+      "kind": "bus_census",
+      "params": {
+        "reference": "self"
+      },
+      "result": {
+        "kind": "bus_census",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 1,
+            "n_rising": 1,
+            "n_falling": 0,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          }
+        }
+      }
+    },
+    {
+      "t": "2026-06-05T22:47:50+00:00",
+      "step_id": "obs",
+      "type": "note",
+      "operator_input": ""
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {}
+}

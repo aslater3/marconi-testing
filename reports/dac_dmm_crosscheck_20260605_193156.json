@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "test": "dac_dmm_crosscheck",
+  "test_description": "Cross-check the AD7522LN DAC by writing known codes via Second Function 3 and measuring TP2 with a DMM. If digital inputs are clean but the analog output is wrong, the DAC itself is faulty.",
+  "operator": "andy",
+  "hostname": "andy-X570-AORUS-ELITE",
+  "started_at": "2026-06-05T18:31:56+00:00",
+  "finished_at": "2026-06-05T18:31:56+00:00",
+  "hardware": "simulate",
+  "captures": {},
+  "events": [
+    {
+      "t": "2026-06-05T18:31:56+00:00",
+      "step_id": "tp2_code_0",
+      "type": "measurement",
+      "channel": "AC4.TP2",
+      "value_v": 0.0,
+      "expected_v": 0.0,
+      "code": 0,
+      "tolerance_pct": 2.0,
+      "unit": "V",
+      "notes": "DAC code 0 \u2014 expect 0.000V",
+      "diff_v": 0.0,
+      "diff_pct": null,
+      "within_tolerance": true
+    },
+    {
+      "t": "2026-06-05T18:31:56+00:00",
+      "step_id": "tp2_code_1024",
+      "type": "measurement",
+      "channel": "AC4.TP2",
+      "value_v": 0.62,
+      "expected_v": 2.5,
+      "code": 1024,
+      "tolerance_pct": 2.0,
+      "unit": "V",
+      "notes": "DAC code 1024 \u2014 expect 2.500V",
+      "diff_v": 1.88,
+      "diff_pct": 75.2,
+      "within_tolerance": false
+    },
+    {
+      "t": "2026-06-05T18:31:56+00:00",
+      "step_id": "tp2_code_2048",
+      "type": "measurement",
+      "channel": "AC4.TP2",
+      "value_v": 1.24,
+      "expected_v": 5.0,
+      "code": 2048,
+      "tolerance_pct": 2.0,
+      "unit": "V",
+      "notes": "DAC code 2048 \u2014 expect 5.000V",
+      "diff_v": 3.76,
+      "diff_pct": 75.2,
+      "within_tolerance": false
+    },
+    {
+      "t": "2026-06-05T18:31:56+00:00",
+      "step_id": "tp2_code_4095",
+      "type": "measurement",
+      "channel": "AC4.TP2",
+      "value_v": 2.48,
+      "expected_v": 9.998,
+      "code": 4095,
+      "tolerance_pct": 2.0,
+      "unit": "V",
+      "notes": "DAC code 4095 \u2014 expect 9.998V",
+      "diff_v": 7.517999999999999,
+      "diff_pct": 75.19503900780155,
+      "within_tolerance": false
+    },
+    {
+      "t": "2026-06-05T18:31:56+00:00",
+      "step_id": "ana_dac",
+      "type": "analysis",
+      "kind": "analogue_vs_code",
+      "params": {
+        "measurements_key": "tp2",
+        "expected_table": {
+          "0": 0.0,
+          "1024": 2.5,
+          "2048": 5.0,
+          "4095": 9.998
+        },
+        "tolerance_pct": 2.0
+      },
+      "result": {
+        "kind": "analogue_vs_code",
+        "full_scale_v": 10.0,
+        "code_max": 4095,
+        "n_measurements": 0,
+        "measurements": [],
+        "summary": {
+          "n_pass": 0,
+          "n_fail": 0,
+          "n_no_expected": 0,
+          "tolerance_pct": 2.0,
+          "verdict": "All 0 measurements within tolerance"
+        }
+      }
+    },
+    {
+      "t": "2026-06-05T18:31:56+00:00",
+      "step_id": "verdict_note",
+      "type": "note",
+      "operator_input": ""
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {
+    "analog_measurements": [
+      {
+        "step_id": "tp2_code_0",
+        "channel": "AC4.TP2",
+        "value_v": 0.0,
+        "expected_v": 0.0,
+        "code": 0,
+        "tolerance_pct": 2.0,
+        "unit": "V",
+        "notes": "DAC code 0 \u2014 expect 0.000V",
+        "diff_v": 0.0,
+        "diff_pct": null,
+        "within_tolerance": true
+      },
+      {
+        "step_id": "tp2_code_1024",
+        "channel": "AC4.TP2",
+        "value_v": 0.62,
+        "expected_v": 2.5,
+        "code": 1024,
+        "tolerance_pct": 2.0,
+        "unit": "V",
+        "notes": "DAC code 1024 \u2014 expect 2.500V",
+        "diff_v": 1.88,
+        "diff_pct": 75.2,
+        "within_tolerance": false
+      },
+      {
+        "step_id": "tp2_code_2048",
+        "channel": "AC4.TP2",
+        "value_v": 1.24,
+        "expected_v": 5.0,
+        "code": 2048,
+        "tolerance_pct": 2.0,
+        "unit": "V",
+        "notes": "DAC code 2048 \u2014 expect 5.000V",
+        "diff_v": 3.76,
+        "diff_pct": 75.2,
+        "within_tolerance": false
+      },
+      {
+        "step_id": "tp2_code_4095",
+        "channel": "AC4.TP2",
+        "value_v": 2.48,
+        "expected_v": 9.998,
+        "code": 4095,
+        "tolerance_pct": 2.0,
+        "unit": "V",
+        "notes": "DAC code 4095 \u2014 expect 9.998V",
+        "diff_v": 7.517999999999999,
+        "diff_pct": 75.19503900780155,
+        "within_tolerance": false
+      }
+    ]
+  }
+}

@@ -1,0 +1,251 @@
+{
+  "schema_version": 1,
+  "test": "ls138_isolation",
+  "test_description": "Confirm or rule out AD4 IC1 (74LS138) as the source of the bus contention on the 'C' address line. Procedure: capture with 138 in circuit, then lift pin 3 of the 138 (electrically disconnecting it from the 'C' line), capture again, and diff. If contention disappears, the 138 is the source.",
+  "operator": "andy",
+  "hostname": "andy-X570-AORUS-ELITE",
+  "started_at": "2026-06-05T18:31:51+00:00",
+  "finished_at": "2026-06-05T18:31:53+00:00",
+  "hardware": "simulate",
+  "captures": {
+    "cap_control": {
+      "name": "cap_control",
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "duration_s": 1.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 5,
+        "edge": "rising"
+      },
+      "raw_path": "/home/andy/marconi-test-harness/captures/cap_control_20260605_193152.raw",
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_control_20260605_193152.vcd",
+      "captured_at": "20260605_193152",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=clean_strobe, scaled to 1000 samples for speed"
+    },
+    "cap_test": {
+      "name": "cap_test",
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "duration_s": 1.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 5,
+        "edge": "rising"
+      },
+      "raw_path": "/home/andy/marconi-test-harness/captures/cap_test_20260605_193153.raw",
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_test_20260605_193153.vcd",
+      "captured_at": "20260605_193153",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=clean_strobe, scaled to 1000 samples for speed"
+    }
+  },
+  "events": [
+    {
+      "t": "2026-06-05T18:31:51+00:00",
+      "step_id": "clip",
+      "type": "clip",
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "probes": {
+        "0": "AA2/1 IC11.Pin18 ('C' line \u2014 the contention victim)",
+        "1": "AA2/1 IC11.Pin16 ('B' line \u2014 control)",
+        "2": "AA2/1 IC11.Pin14 ('A' line \u2014 control)",
+        "3": "AC4 AD7522.Pin24 LB strobe",
+        "4": "AC4 AD7522.Pin25 HB strobe",
+        "5": "AC4 AD7522.Pin21 LDAC",
+        "6": "AD4 IC1.Pin15 /Y0 (74LS138 output A)",
+        "7": "AD4 IC1.Pin14 /Y1 (74LS138 output B)"
+      },
+      "text": "Clip 8 channels per the contention test map:"
+    },
+    {
+      "t": "2026-06-05T18:31:52+00:00",
+      "step_id": "cap_control",
+      "type": "capture",
+      "capture_id": "cap_control",
+      "mode": "simulate",
+      "duration_s": 1.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_control_20260605_193152.vcd"
+    },
+    {
+      "t": "2026-06-05T18:31:52+00:00",
+      "step_id": "control_tp2",
+      "type": "measurement",
+      "channel": "AC4.TP2",
+      "value_v": 0.124,
+      "expected_v": 0.0,
+      "code": 0,
+      "tolerance_pct": 2.0,
+      "unit": "V",
+      "notes": "control: AD4 IC1 (138) fully in circuit",
+      "diff_v": 0.124,
+      "diff_pct": null,
+      "within_tolerance": false
+    },
+    {
+      "t": "2026-06-05T18:31:53+00:00",
+      "step_id": "cap_test",
+      "type": "capture",
+      "capture_id": "cap_test",
+      "mode": "simulate",
+      "duration_s": 1.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_test_20260605_193153.vcd"
+    },
+    {
+      "t": "2026-06-05T18:31:53+00:00",
+      "step_id": "test_tp2",
+      "type": "measurement",
+      "channel": "AC4.TP2",
+      "value_v": 7.0,
+      "expected_v": 0.0,
+      "code": 0,
+      "tolerance_pct": 2.0,
+      "unit": "V",
+      "notes": "test: AD4 IC1 Pin 3 lifted",
+      "diff_v": 7.0,
+      "diff_pct": null,
+      "within_tolerance": false
+    },
+    {
+      "t": "2026-06-05T18:31:53+00:00",
+      "step_id": "ana_diff",
+      "type": "analysis",
+      "kind": "diff",
+      "params": {
+        "a": "cap_control",
+        "b": "cap_test"
+      },
+      "result": {
+        "kind": "diff",
+        "first_divergence": null,
+        "per_channel": {
+          "ch0": {
+            "channel": 0,
+            "n_transitions_a": 0,
+            "n_transitions_b": 0,
+            "first_divergence": null,
+            "count_diff": null
+          },
+          "ch1": {
+            "channel": 1,
+            "n_transitions_a": 0,
+            "n_transitions_b": 0,
+            "first_divergence": null,
+            "count_diff": null
+          },
+          "ch2": {
+            "channel": 2,
+            "n_transitions_a": 0,
+            "n_transitions_b": 0,
+            "first_divergence": null,
+            "count_diff": null
+          },
+          "ch3": {
+            "channel": 3,
+            "n_transitions_a": 0,
+            "n_transitions_b": 0,
+            "first_divergence": null,
+            "count_diff": null
+          },
+          "ch4": {
+            "channel": 4,
+            "n_transitions_a": 0,
+            "n_transitions_b": 0,
+            "first_divergence": null,
+            "count_diff": null
+          },
+          "ch5": {
+            "channel": 5,
+            "n_transitions_a": 0,
+            "n_transitions_b": 0,
+            "first_divergence": null,
+            "count_diff": null
+          },
+          "ch6": {
+            "channel": 6,
+            "n_transitions_a": 0,
+            "n_transitions_b": 0,
+            "first_divergence": null,
+            "count_diff": null
+          },
+          "ch7": {
+            "channel": 7,
+            "n_transitions_a": 1,
+            "n_transitions_b": 1,
+            "first_divergence": null,
+            "count_diff": null
+          }
+        }
+      }
+    },
+    {
+      "t": "2026-06-05T18:31:53+00:00",
+      "step_id": "verdict_note",
+      "type": "note",
+      "operator_input": ""
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {
+    "analog_measurements": [
+      {
+        "step_id": "control_tp2",
+        "channel": "AC4.TP2",
+        "value_v": 0.124,
+        "expected_v": 0.0,
+        "code": 0,
+        "tolerance_pct": 2.0,
+        "unit": "V",
+        "notes": "control: AD4 IC1 (138) fully in circuit",
+        "diff_v": 0.124,
+        "diff_pct": null,
+        "within_tolerance": false
+      },
+      {
+        "step_id": "test_tp2",
+        "channel": "AC4.TP2",
+        "value_v": 7.0,
+        "expected_v": 0.0,
+        "code": 0,
+        "tolerance_pct": 2.0,
+        "unit": "V",
+        "notes": "test: AD4 IC1 Pin 3 lifted",
+        "diff_v": 7.0,
+        "diff_pct": null,
+        "within_tolerance": false
+      }
+    ]
+  }
+}

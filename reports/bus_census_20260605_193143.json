@@ -1,0 +1,790 @@
+{
+  "schema_version": 1,
+  "test": "bus_census",
+  "test_description": "Per-channel health check on the AA2/1 address bus. For each recipient board, isolate the bus, capture, and compare to baseline. Identifies stuck-at, high-impedance, and contention lines.",
+  "operator": "andy",
+  "hostname": "andy-X570-AORUS-ELITE",
+  "started_at": "2026-06-05T18:31:31+00:00",
+  "finished_at": "2026-06-05T18:31:43+00:00",
+  "hardware": "simulate",
+  "captures": {
+    "cap_baseline_idle": {
+      "name": "cap_baseline_idle",
+      "sample_rate_hz": 1000000,
+      "n_samples": 1000,
+      "duration_s": 2.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": null,
+      "raw_path": "/home/andy/marconi-test-harness/captures/cap_baseline_idle_20260605_193133.raw",
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_baseline_idle_20260605_193133.vcd",
+      "captured_at": "20260605_193133",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=clean_strobe, scaled to 1000 samples for speed"
+    },
+    "cap_baseline_active": {
+      "name": "cap_baseline_active",
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "duration_s": 2.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 7,
+        "edge": "rising"
+      },
+      "raw_path": "/home/andy/marconi-test-harness/captures/cap_baseline_active_20260605_193135.raw",
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_baseline_active_20260605_193135.vcd",
+      "captured_at": "20260605_193135",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=clean_strobe, scaled to 1000 samples for speed"
+    },
+    "cap_with_ac13": {
+      "name": "cap_with_ac13",
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "duration_s": 2.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 7,
+        "edge": "rising"
+      },
+      "raw_path": "/home/andy/marconi-test-harness/captures/cap_with_ac13_20260605_193137.raw",
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_with_ac13_20260605_193137.vcd",
+      "captured_at": "20260605_193137",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=clean_strobe, scaled to 1000 samples for speed"
+    },
+    "cap_with_ad4": {
+      "name": "cap_with_ad4",
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "duration_s": 2.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 7,
+        "edge": "rising"
+      },
+      "raw_path": "/home/andy/marconi-test-harness/captures/cap_with_ad4_20260605_193139.raw",
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_with_ad4_20260605_193139.vcd",
+      "captured_at": "20260605_193139",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=clean_strobe, scaled to 1000 samples for speed"
+    },
+    "cap_with_ad2": {
+      "name": "cap_with_ad2",
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "duration_s": 2.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 7,
+        "edge": "rising"
+      },
+      "raw_path": "/home/andy/marconi-test-harness/captures/cap_with_ad2_20260605_193141.raw",
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_with_ad2_20260605_193141.vcd",
+      "captured_at": "20260605_193141",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=clean_strobe, scaled to 1000 samples for speed"
+    },
+    "cap_all_boards": {
+      "name": "cap_all_boards",
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "duration_s": 2.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 7,
+        "edge": "rising"
+      },
+      "raw_path": "/home/andy/marconi-test-harness/captures/cap_all_boards_20260605_193143.raw",
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_all_boards_20260605_193143.vcd",
+      "captured_at": "20260605_193143",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=clean_strobe, scaled to 1000 samples for speed"
+    }
+  },
+  "events": [
+    {
+      "t": "2026-06-05T18:31:31+00:00",
+      "step_id": "clip_baseline",
+      "type": "clip",
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "probes": {
+        "0": "AA2/1 IC11.Pin18  (bus 'C' address line \u2014 the suspect; assumes Y7=C)",
+        "1": "AA2/1 IC11.Pin16  (bus 'B' address line \u2014 assumes Y6=B)",
+        "2": "AA2/1 IC11.Pin14  (bus 'A' address line \u2014 assumes Y5=A)",
+        "3": "AA2/1 IC10.Pin2   (data bus A0 = 74LS245 A-side bit 0)",
+        "4": "AA2/1 IC10.Pin5   (data bus A1 = 74LS245 A-side bit 1)",
+        "5": "AA2/1 IC10.Pin7   (data bus A2 = 74LS245 A-side bit 2)",
+        "6": "AA2/1 IC10.Pin10  (data bus A3 = 74LS245 A-side bit 3)",
+        "7": "AA2/1 IC20.Pin11  (74LS273 CLK = data-valid strobe for ext. latches)"
+      },
+      "text": "Clip the 8 LA channels to the AA2/1 bus:\n  - 8 channel clips as listed below\n  - 1 GND clip on AA2/1 GND (e.g. Pin 10 of any 74LSxx, or the AA2 TP_GND)\n\nNOTE on A/B/C labels: IC11's Y outputs carry the 3-bit address field, but which Y-output is A, B, or C is not in the wiki. Verify against page-014 Fig. 3 of the service manual before drawing diagnostic conclusions.\n"
+    },
+    {
+      "t": "2026-06-05T18:31:33+00:00",
+      "step_id": "cap_baseline_idle",
+      "type": "capture",
+      "capture_id": "cap_baseline_idle",
+      "mode": "simulate",
+      "duration_s": 2.0,
+      "sample_rate_hz": 1000000,
+      "n_samples": 1000,
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_baseline_idle_20260605_193133.vcd"
+    },
+    {
+      "t": "2026-06-05T18:31:35+00:00",
+      "step_id": "cap_baseline_active",
+      "type": "capture",
+      "capture_id": "cap_baseline_active",
+      "mode": "simulate",
+      "duration_s": 2.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_baseline_active_20260605_193135.vcd"
+    },
+    {
+      "t": "2026-06-05T18:31:35+00:00",
+      "step_id": "ana_baseline",
+      "type": "analysis",
+      "kind": "bus_census",
+      "params": {
+        "reference": "self",
+        "expect_quiescent": "cap_baseline_idle"
+      },
+      "result": {
+        "kind": "bus_census",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 1,
+            "n_rising": 1,
+            "n_falling": 0,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": "low activity (1 edge in 2.0s)",
+            "edge_ratio_vs_ref": 1.0
+          }
+        }
+      }
+    },
+    {
+      "t": "2026-06-05T18:31:37+00:00",
+      "step_id": "cap_with_ac13",
+      "type": "capture",
+      "capture_id": "cap_with_ac13",
+      "mode": "simulate",
+      "duration_s": 2.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_with_ac13_20260605_193137.vcd"
+    },
+    {
+      "t": "2026-06-05T18:31:37+00:00",
+      "step_id": "ana_with_ac13",
+      "type": "analysis",
+      "kind": "bus_census",
+      "params": {
+        "reference": "cap_baseline_active"
+      },
+      "result": {
+        "kind": "bus_census",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 1,
+            "n_rising": 1,
+            "n_falling": 0,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": "",
+            "edge_ratio_vs_ref": 1.0
+          }
+        }
+      }
+    },
+    {
+      "t": "2026-06-05T18:31:37+00:00",
+      "step_id": "obs_ac13",
+      "type": "note",
+      "operator_input": ""
+    },
+    {
+      "t": "2026-06-05T18:31:39+00:00",
+      "step_id": "cap_with_ad4",
+      "type": "capture",
+      "capture_id": "cap_with_ad4",
+      "mode": "simulate",
+      "duration_s": 2.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_with_ad4_20260605_193139.vcd"
+    },
+    {
+      "t": "2026-06-05T18:31:39+00:00",
+      "step_id": "ana_with_ad4",
+      "type": "analysis",
+      "kind": "bus_census",
+      "params": {
+        "reference": "cap_with_ac13"
+      },
+      "result": {
+        "kind": "bus_census",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 1,
+            "n_rising": 1,
+            "n_falling": 0,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": "",
+            "edge_ratio_vs_ref": 1.0
+          }
+        }
+      }
+    },
+    {
+      "t": "2026-06-05T18:31:39+00:00",
+      "step_id": "obs_ad4",
+      "type": "note",
+      "operator_input": ""
+    },
+    {
+      "t": "2026-06-05T18:31:41+00:00",
+      "step_id": "cap_with_ad2",
+      "type": "capture",
+      "capture_id": "cap_with_ad2",
+      "mode": "simulate",
+      "duration_s": 2.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_with_ad2_20260605_193141.vcd"
+    },
+    {
+      "t": "2026-06-05T18:31:41+00:00",
+      "step_id": "ana_with_ad2",
+      "type": "analysis",
+      "kind": "bus_census",
+      "params": {
+        "reference": "cap_with_ad4"
+      },
+      "result": {
+        "kind": "bus_census",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 1,
+            "n_rising": 1,
+            "n_falling": 0,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": "",
+            "edge_ratio_vs_ref": 1.0
+          }
+        }
+      }
+    },
+    {
+      "t": "2026-06-05T18:31:41+00:00",
+      "step_id": "obs_ad2",
+      "type": "note",
+      "operator_input": ""
+    },
+    {
+      "t": "2026-06-05T18:31:43+00:00",
+      "step_id": "cap_all_boards",
+      "type": "capture",
+      "capture_id": "cap_all_boards",
+      "mode": "simulate",
+      "duration_s": 2.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_all_boards_20260605_193143.vcd"
+    },
+    {
+      "t": "2026-06-05T18:31:43+00:00",
+      "step_id": "ana_all_boards",
+      "type": "analysis",
+      "kind": "bus_census",
+      "params": {
+        "reference": "cap_with_ad2"
+      },
+      "result": {
+        "kind": "bus_census",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)",
+            "edge_ratio_vs_ref": 1.0
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 1,
+            "n_rising": 1,
+            "n_falling": 0,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": "",
+            "edge_ratio_vs_ref": 1.0
+          }
+        }
+      }
+    },
+    {
+      "t": "2026-06-05T18:31:43+00:00",
+      "step_id": "obs_all",
+      "type": "note",
+      "operator_input": ""
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {}
+}

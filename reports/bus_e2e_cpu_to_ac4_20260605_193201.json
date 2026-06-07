@@ -1,0 +1,361 @@
+{
+  "schema_version": 1,
+  "test": "bus_e2e_cpu_to_ac4",
+  "test_description": "End-to-end CPU\u2192AC4 bus verification. Walks the operator through 4 captures, one per stage of the A7L2/A7L3 write pipeline (CPU \u2192 buffer \u2192 decoder \u2192 DAC), and produces a stage-by-stage verdict table that pinpoints which stage the transaction first goes wrong. Optionally cross-checks the analog TP2 voltage.",
+  "operator": "andy",
+  "hostname": "andy-X570-AORUS-ELITE",
+  "started_at": "2026-06-05T18:31:57+00:00",
+  "finished_at": "2026-06-05T18:32:01+00:00",
+  "hardware": "simulate",
+  "captures": {
+    "cap_stage1": {
+      "name": "cap_stage1",
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "duration_s": 1.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 1,
+        "edge": "falling"
+      },
+      "raw_path": "/home/andy/marconi-test-harness/captures/cap_stage1_20260605_193158.raw",
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_stage1_20260605_193158.vcd",
+      "captured_at": "20260605_193158",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=e2e_cpu_to_ac4:clean, scaled to 1000 samples for speed"
+    },
+    "cap_stage2": {
+      "name": "cap_stage2",
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "duration_s": 1.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 1,
+        "edge": "falling"
+      },
+      "raw_path": "/home/andy/marconi-test-harness/captures/cap_stage2_20260605_193159.raw",
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_stage2_20260605_193159.vcd",
+      "captured_at": "20260605_193159",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=e2e_cpu_to_ac4:clean, scaled to 1000 samples for speed"
+    },
+    "cap_stage3": {
+      "name": "cap_stage3",
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "duration_s": 1.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 5,
+        "edge": "falling"
+      },
+      "raw_path": "/home/andy/marconi-test-harness/captures/cap_stage3_20260605_193200.raw",
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_stage3_20260605_193200.vcd",
+      "captured_at": "20260605_193200",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=e2e_cpu_to_ac4:clean, scaled to 1000 samples for speed"
+    },
+    "cap_stage4": {
+      "name": "cap_stage4",
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "duration_s": 1.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 6,
+        "edge": "falling"
+      },
+      "raw_path": "/home/andy/marconi-test-harness/captures/cap_stage4_20260605_193201.raw",
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_stage4_20260605_193201.vcd",
+      "captured_at": "20260605_193201",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=e2e_cpu_to_ac4:clean, scaled to 1000 samples for speed"
+    }
+  },
+  "events": [
+    {
+      "t": "2026-06-05T18:31:57+00:00",
+      "step_id": "clip_all",
+      "type": "clip",
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "probes": {
+        "0": "AA2/1 IC5.Pin30  ALE  (8085 address latch enable)",
+        "1": "AA2/1 IC5.Pin31  /WR  (8085 write strobe \u2014 active LOW)",
+        "2": "AA2/1 IC5.Pin37  CLK  (8085 system clock, 3.072 MHz)",
+        "3": "AA2/1 IC21.Q     A0   (latched lower address from demuxer)",
+        "4": "AA2/1 IC11.Pin18 'C'  (address line \u2014 the bus contention target)",
+        "5": "AC3/ACL3 IC1.Pin15 /Y1  A7L1  (74LS138 Y-output for the target latch)",
+        "6": "AC4 IC6.Pin24  LB   (AD7522 low-byte strobe)",
+        "7": "AC4 IC6.Pin21  LDAC (AD7522 load-DAC strobe)"
+      },
+      "text": "Clip the 8 LA channels ONCE \u2014 the same probe map is used for all 4 stages."
+    },
+    {
+      "t": "2026-06-05T18:31:58+00:00",
+      "step_id": "cap_stage1",
+      "type": "capture",
+      "capture_id": "cap_stage1",
+      "mode": "simulate",
+      "duration_s": 1.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_stage1_20260605_193158.vcd"
+    },
+    {
+      "t": "2026-06-05T18:31:59+00:00",
+      "step_id": "cap_stage2",
+      "type": "capture",
+      "capture_id": "cap_stage2",
+      "mode": "simulate",
+      "duration_s": 1.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_stage2_20260605_193159.vcd"
+    },
+    {
+      "t": "2026-06-05T18:32:00+00:00",
+      "step_id": "cap_stage3",
+      "type": "capture",
+      "capture_id": "cap_stage3",
+      "mode": "simulate",
+      "duration_s": 1.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_stage3_20260605_193200.vcd"
+    },
+    {
+      "t": "2026-06-05T18:32:01+00:00",
+      "step_id": "cap_stage4",
+      "type": "capture",
+      "capture_id": "cap_stage4",
+      "mode": "simulate",
+      "duration_s": 1.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_stage4_20260605_193201.vcd"
+    },
+    {
+      "t": "2026-06-05T18:32:01+00:00",
+      "step_id": "tp2_after_write",
+      "type": "measurement",
+      "channel": "AC4.TP2",
+      "value_v": 0.01,
+      "expected_v": 0.01,
+      "code": 1,
+      "tolerance_pct": 50.0,
+      "unit": "V",
+      "notes": "After Second Function 3, A7L2 = 00000001, A7L3 = 00000000. Per page-033: 1 LSB = 1 mV at the comparator (TP2).",
+      "diff_v": 0.0,
+      "diff_pct": 0.0,
+      "within_tolerance": true
+    },
+    {
+      "t": "2026-06-05T18:32:01+00:00",
+      "step_id": "ana_e2e",
+      "type": "analysis",
+      "kind": "bus_e2e",
+      "params": {
+        "stage_captures": {
+          "stage1": "cap_stage1",
+          "stage2": "cap_stage2",
+          "stage3": "cap_stage3",
+          "stage4": "cap_stage4"
+        },
+        "expected_tp2_v": 0.01,
+        "tp2_tolerance_pct": 50.0
+      },
+      "result": {
+        "kind": "bus_e2e",
+        "stages": {
+          "stage1": {
+            "stage": 1,
+            "name": "CPU (IC5 P8085A)",
+            "capture_id": "cap_stage1",
+            "checks": [
+              {
+                "role": "clk",
+                "channel": 2,
+                "description": "IC5.37 produces a clock pulse (3.072 MHz)",
+                "n_edges": 4,
+                "min_required": 2,
+                "pass": true
+              },
+              {
+                "role": "ale",
+                "channel": 0,
+                "description": "IC5.30 ALE pulses HIGH (demuxes address)",
+                "n_edges": 4,
+                "min_required": 1,
+                "pass": true
+              },
+              {
+                "role": "wr_cpu",
+                "channel": 1,
+                "description": "IC5.31 /WR pulses LOW (write cycle)",
+                "n_edges": 4,
+                "min_required": 1,
+                "pass": true
+              }
+            ],
+            "pass": true,
+            "notes": []
+          },
+          "stage2": {
+            "stage": 2,
+            "name": "Buffer (IC10 74LS245 + IC11 74LS244)",
+            "capture_id": "cap_stage2",
+            "checks": [
+              {
+                "role": "a0",
+                "channel": 3,
+                "description": "IC21 latched the A0 address bit onto the bus",
+                "n_edges": 4,
+                "min_required": 1,
+                "pass": true
+              },
+              {
+                "role": "addr_c",
+                "channel": 4,
+                "description": "IC11.18 'C' line toggles cleanly (no shark fin)",
+                "n_edges": 2,
+                "min_required": 2,
+                "pass": true
+              }
+            ],
+            "pass": true,
+            "notes": []
+          },
+          "stage3": {
+            "stage": 3,
+            "name": "Decoder (AC3/ACL3 IC1 74LS138)",
+            "capture_id": "cap_stage3",
+            "checks": [
+              {
+                "role": "a7l_y",
+                "channel": 5,
+                "description": "AC3/ACL3 IC1 selected the right Y-output (A7L?)",
+                "n_edges": 2,
+                "min_required": 1,
+                "pass": true
+              }
+            ],
+            "pass": true,
+            "notes": []
+          },
+          "stage4": {
+            "stage": 4,
+            "name": "DAC (AC4 IC6 AD7522)",
+            "capture_id": "cap_stage4",
+            "checks": [
+              {
+                "role": "lb",
+                "channel": 6,
+                "description": "AD7522 LB strobe pulsed (Pin 24)",
+                "n_edges": 2,
+                "min_required": 1,
+                "pass": true
+              },
+              {
+                "role": "ldac",
+                "channel": 7,
+                "description": "AD7522 LDAC strobe fired after LB settled (Pin 21)",
+                "n_edges": 2,
+                "min_required": 1,
+                "pass": true
+              }
+            ],
+            "pass": true,
+            "notes": []
+          }
+        },
+        "first_failing_stage": null,
+        "summary": {
+          "n_stages": 4,
+          "n_pass": 4,
+          "n_fail": 0,
+          "all_stages_pass": true,
+          "verdict": "ALL 4 STAGES PASS \u2014 bus is healthy end-to-end"
+        },
+        "analog": {
+          "checked": true,
+          "measured_v": 0.01,
+          "expected_v": 0.01,
+          "diff_v": 0.0,
+          "within_tolerance": true,
+          "code": 1,
+          "tolerance_pct": 50.0
+        }
+      }
+    },
+    {
+      "t": "2026-06-05T18:32:01+00:00",
+      "step_id": "obs",
+      "type": "note",
+      "operator_input": ""
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {
+    "analog_measurements": [
+      {
+        "step_id": "tp2_after_write",
+        "channel": "AC4.TP2",
+        "value_v": 0.01,
+        "expected_v": 0.01,
+        "code": 1,
+        "tolerance_pct": 50.0,
+        "unit": "V",
+        "notes": "After Second Function 3, A7L2 = 00000001, A7L3 = 00000000. Per page-033: 1 LSB = 1 mV at the comparator (TP2).",
+        "diff_v": 0.0,
+        "diff_pct": 0.0,
+        "within_tolerance": true
+      }
+    ]
+  }
+}

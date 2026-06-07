@@ -1,0 +1,508 @@
+{
+  "schema_version": 1,
+  "test": "ls273_sequence",
+  "test_description": "Detect a stuck or non-updating 74LS273 output bit. The procedure writes three different single-bit codes (1, 2, 4) via Second Function 3 and captures the bus for each. An N-way diff checks that each output bit toggles when it should.",
+  "operator": "andy",
+  "hostname": "andy-X570-AORUS-ELITE",
+  "started_at": "2026-06-05T18:31:54+00:00",
+  "finished_at": "2026-06-05T18:31:55+00:00",
+  "hardware": "simulate",
+  "captures": {
+    "cap_code_1": {
+      "name": "cap_code_1",
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "duration_s": 0.5,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 6,
+        "edge": "rising"
+      },
+      "raw_path": "/home/andy/marconi-test-harness/captures/cap_code_1_20260605_193154.raw",
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_code_1_20260605_193154.vcd",
+      "captured_at": "20260605_193154",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=clean_strobe, scaled to 1000 samples for speed"
+    },
+    "cap_code_2": {
+      "name": "cap_code_2",
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "duration_s": 0.5,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 6,
+        "edge": "rising"
+      },
+      "raw_path": "/home/andy/marconi-test-harness/captures/cap_code_2_20260605_193155.raw",
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_code_2_20260605_193155.vcd",
+      "captured_at": "20260605_193155",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=clean_strobe, scaled to 1000 samples for speed"
+    },
+    "cap_code_4": {
+      "name": "cap_code_4",
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "duration_s": 0.5,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 6,
+        "edge": "rising"
+      },
+      "raw_path": "/home/andy/marconi-test-harness/captures/cap_code_4_20260605_193155.raw",
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_code_4_20260605_193155.vcd",
+      "captured_at": "20260605_193155",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=clean_strobe, scaled to 1000 samples for speed"
+    }
+  },
+  "events": [
+    {
+      "t": "2026-06-05T18:31:54+00:00",
+      "step_id": "clip",
+      "type": "clip",
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "probes": {
+        "0": "AA2/1 IC10.Pin2   (data bus A0 = 74LS245 A-side bit 0)",
+        "1": "AA2/1 IC10.Pin5   (data bus A1 = 74LS245 A-side bit 1)",
+        "2": "AA2/1 IC10.Pin7   (data bus A2 = 74LS245 A-side bit 2)",
+        "3": "AA2/1 IC10.Pin10  (data bus A3 = 74LS245 A-side bit 3)",
+        "4": "AA2/1 IC10.Pin12  (data bus A4 = 74LS245 A-side bit 4)",
+        "5": "AC4 AD7522.Pin24  (LB strobe \u2014 latches A0-A7 on the DAC)",
+        "6": "AC4 AD7522.Pin21  (LDAC \u2014 loads the DAC from the latched byte)",
+        "7": "GND (reference \u2014 clip to AA2/1 GND)"
+      },
+      "text": "Clip 8 channels to the data bus + strobes:\n  - 8 channel clips as listed below\n  - 1 GND clip on AA2/1 GND (e.g. Pin 10 of any 74LSxx, or AA2 TP_GND)\n"
+    },
+    {
+      "t": "2026-06-05T18:31:54+00:00",
+      "step_id": "cap_code_1",
+      "type": "capture",
+      "capture_id": "cap_code_1",
+      "mode": "simulate",
+      "duration_s": 0.5,
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_code_1_20260605_193154.vcd"
+    },
+    {
+      "t": "2026-06-05T18:31:55+00:00",
+      "step_id": "cap_code_2",
+      "type": "capture",
+      "capture_id": "cap_code_2",
+      "mode": "simulate",
+      "duration_s": 0.5,
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_code_2_20260605_193155.vcd"
+    },
+    {
+      "t": "2026-06-05T18:31:55+00:00",
+      "step_id": "cap_code_4",
+      "type": "capture",
+      "capture_id": "cap_code_4",
+      "mode": "simulate",
+      "duration_s": 0.5,
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "vcd_path": "/home/andy/marconi-test-harness/captures/cap_code_4_20260605_193155.vcd"
+    },
+    {
+      "t": "2026-06-05T18:31:55+00:00",
+      "step_id": "ana_nway",
+      "type": "analysis",
+      "kind": "n_way_diff",
+      "params": {
+        "captures": [
+          "cap_code_1",
+          "cap_code_2",
+          "cap_code_4"
+        ],
+        "expect_levels": {
+          "0": [
+            1,
+            0,
+            0
+          ],
+          "1": [
+            0,
+            1,
+            0
+          ],
+          "2": [
+            0,
+            0,
+            1
+          ],
+          "3": [
+            0,
+            0,
+            0
+          ],
+          "4": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "result": {
+        "kind": "n_way_diff",
+        "n_captures": 3,
+        "capture_names": [
+          "cap_code_1",
+          "cap_code_2",
+          "cap_code_4"
+        ],
+        "per_channel": {
+          "ch0": {
+            "channel": 0,
+            "health": "stuck_or_wrong",
+            "notes": "expected levels [1, 0, 0], got [0, 0, 0]",
+            "levels_changed": false,
+            "final_state_sequence": [
+              0,
+              0,
+              0
+            ],
+            "level_match": {
+              "ok": false,
+              "mismatches": [
+                {
+                  "index": 0,
+                  "expected": 1,
+                  "actual": 0
+                }
+              ]
+            },
+            "per_capture": [
+              {
+                "capture_index": 0,
+                "capture_name": "cap_code_1",
+                "n_transitions": 0,
+                "final_state": 0
+              },
+              {
+                "capture_index": 1,
+                "capture_name": "cap_code_2",
+                "n_transitions": 0,
+                "final_state": 0
+              },
+              {
+                "capture_index": 2,
+                "capture_name": "cap_code_4",
+                "n_transitions": 0,
+                "final_state": 0
+              }
+            ]
+          },
+          "ch1": {
+            "channel": 1,
+            "health": "stuck_or_wrong",
+            "notes": "expected levels [0, 1, 0], got [0, 0, 0]",
+            "levels_changed": false,
+            "final_state_sequence": [
+              0,
+              0,
+              0
+            ],
+            "level_match": {
+              "ok": false,
+              "mismatches": [
+                {
+                  "index": 1,
+                  "expected": 1,
+                  "actual": 0
+                }
+              ]
+            },
+            "per_capture": [
+              {
+                "capture_index": 0,
+                "capture_name": "cap_code_1",
+                "n_transitions": 0,
+                "final_state": 0
+              },
+              {
+                "capture_index": 1,
+                "capture_name": "cap_code_2",
+                "n_transitions": 0,
+                "final_state": 0
+              },
+              {
+                "capture_index": 2,
+                "capture_name": "cap_code_4",
+                "n_transitions": 0,
+                "final_state": 0
+              }
+            ]
+          },
+          "ch2": {
+            "channel": 2,
+            "health": "stuck_or_wrong",
+            "notes": "expected levels [0, 0, 1], got [0, 0, 0]",
+            "levels_changed": false,
+            "final_state_sequence": [
+              0,
+              0,
+              0
+            ],
+            "level_match": {
+              "ok": false,
+              "mismatches": [
+                {
+                  "index": 2,
+                  "expected": 1,
+                  "actual": 0
+                }
+              ]
+            },
+            "per_capture": [
+              {
+                "capture_index": 0,
+                "capture_name": "cap_code_1",
+                "n_transitions": 0,
+                "final_state": 0
+              },
+              {
+                "capture_index": 1,
+                "capture_name": "cap_code_2",
+                "n_transitions": 0,
+                "final_state": 0
+              },
+              {
+                "capture_index": 2,
+                "capture_name": "cap_code_4",
+                "n_transitions": 0,
+                "final_state": 0
+              }
+            ]
+          },
+          "ch3": {
+            "channel": 3,
+            "health": "stuck",
+            "notes": "final_state constant at 0 across 3 captures",
+            "levels_changed": false,
+            "final_state_sequence": [
+              0,
+              0,
+              0
+            ],
+            "level_match": {
+              "ok": true,
+              "mismatches": []
+            },
+            "per_capture": [
+              {
+                "capture_index": 0,
+                "capture_name": "cap_code_1",
+                "n_transitions": 0,
+                "final_state": 0
+              },
+              {
+                "capture_index": 1,
+                "capture_name": "cap_code_2",
+                "n_transitions": 0,
+                "final_state": 0
+              },
+              {
+                "capture_index": 2,
+                "capture_name": "cap_code_4",
+                "n_transitions": 0,
+                "final_state": 0
+              }
+            ]
+          },
+          "ch4": {
+            "channel": 4,
+            "health": "stuck",
+            "notes": "final_state constant at 0 across 3 captures",
+            "levels_changed": false,
+            "final_state_sequence": [
+              0,
+              0,
+              0
+            ],
+            "level_match": {
+              "ok": true,
+              "mismatches": []
+            },
+            "per_capture": [
+              {
+                "capture_index": 0,
+                "capture_name": "cap_code_1",
+                "n_transitions": 0,
+                "final_state": 0
+              },
+              {
+                "capture_index": 1,
+                "capture_name": "cap_code_2",
+                "n_transitions": 0,
+                "final_state": 0
+              },
+              {
+                "capture_index": 2,
+                "capture_name": "cap_code_4",
+                "n_transitions": 0,
+                "final_state": 0
+              }
+            ]
+          },
+          "ch5": {
+            "channel": 5,
+            "health": "stuck",
+            "notes": "final_state constant at 0 across 3 captures",
+            "levels_changed": false,
+            "final_state_sequence": [
+              0,
+              0,
+              0
+            ],
+            "level_match": null,
+            "per_capture": [
+              {
+                "capture_index": 0,
+                "capture_name": "cap_code_1",
+                "n_transitions": 0,
+                "final_state": 0
+              },
+              {
+                "capture_index": 1,
+                "capture_name": "cap_code_2",
+                "n_transitions": 0,
+                "final_state": 0
+              },
+              {
+                "capture_index": 2,
+                "capture_name": "cap_code_4",
+                "n_transitions": 0,
+                "final_state": 0
+              }
+            ]
+          },
+          "ch6": {
+            "channel": 6,
+            "health": "stuck",
+            "notes": "final_state constant at 0 across 3 captures",
+            "levels_changed": false,
+            "final_state_sequence": [
+              0,
+              0,
+              0
+            ],
+            "level_match": null,
+            "per_capture": [
+              {
+                "capture_index": 0,
+                "capture_name": "cap_code_1",
+                "n_transitions": 0,
+                "final_state": 0
+              },
+              {
+                "capture_index": 1,
+                "capture_name": "cap_code_2",
+                "n_transitions": 0,
+                "final_state": 0
+              },
+              {
+                "capture_index": 2,
+                "capture_name": "cap_code_4",
+                "n_transitions": 0,
+                "final_state": 0
+              }
+            ]
+          },
+          "ch7": {
+            "channel": 7,
+            "health": "stuck",
+            "notes": "final_state constant at 1 across 3 captures",
+            "levels_changed": false,
+            "final_state_sequence": [
+              1,
+              1,
+              1
+            ],
+            "level_match": null,
+            "per_capture": [
+              {
+                "capture_index": 0,
+                "capture_name": "cap_code_1",
+                "n_transitions": 1,
+                "final_state": 1
+              },
+              {
+                "capture_index": 1,
+                "capture_name": "cap_code_2",
+                "n_transitions": 1,
+                "final_state": 1
+              },
+              {
+                "capture_index": 2,
+                "capture_name": "cap_code_4",
+                "n_transitions": 1,
+                "final_state": 1
+              }
+            ]
+          }
+        },
+        "summary": {
+          "n_ok": 5,
+          "n_truly_stuck": 0,
+          "n_wrong_level": 3,
+          "truly_stuck_channels": [],
+          "wrong_level_channels": [
+            "ch0",
+            "ch1",
+            "ch2"
+          ],
+          "verdict": "WRONG LEVEL on channels: ['ch0', 'ch1', 'ch2']"
+        }
+      }
+    },
+    {
+      "t": "2026-06-05T18:31:55+00:00",
+      "step_id": "verdict_note",
+      "type": "note",
+      "operator_input": ""
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {}
+}

@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "test": "aa2_ls138_isolation",
+  "test_description": "Non-invasive signal-integrity check of the AA2/1 on-board 74LS138 (IC13 or IC17 \u2014 operator to confirm from PCB silkscreen). Probes all 8 Y-outputs simultaneously and runs the signal-integrity analyser on each. The bus contention signature (sub-100ns gaps, aliasing of >24 MHz oscillation) on one or more Y-outputs while the others are clean indicates a damaged 74LS138 output stage that's loading the bus. The Y-outputs that show the fault are the candidate for replacement.",
+  "operator": "andy",
+  "hostname": "andy-X570-AORUS-ELITE",
+  "started_at": "2026-06-06T18:45:22+00:00",
+  "finished_at": "2026-06-06T18:45:22+00:00",
+  "hardware": "dry_run",
+  "captures": {
+    "cap_ls138": {
+      "name": "cap_ls138",
+      "sample_rate_hz": 24000000,
+      "n_samples": 0,
+      "duration_s": 5.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": null,
+      "raw_path": "/home/andy/marconi-test-harness/captures/cap_ls138_20260606_194522.raw",
+      "vcd_path": null,
+      "captured_at": "20260606_194522",
+      "mode": "dry_run",
+      "notes": "dry-run: no capture performed"
+    }
+  },
+  "events": [
+    {
+      "t": "2026-06-06T18:45:22+00:00",
+      "step_id": "cap_ls138",
+      "type": "capture",
+      "capture_id": "cap_ls138",
+      "mode": "dry_run",
+      "duration_s": 5.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 0,
+      "vcd_path": null
+    },
+    {
+      "t": "2026-06-06T18:45:22+00:00",
+      "step_id": "ana_ls138_census",
+      "type": "analysis",
+      "kind": "bus_census",
+      "params": {
+        "reference": "self"
+      },
+      "result": {
+        "kind": "bus_census",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          }
+        }
+      }
+    },
+    {
+      "t": "2026-06-06T18:45:22+00:00",
+      "step_id": "ana_ls138_si",
+      "type": "analysis",
+      "kind": "signal_integrity",
+      "params": {},
+      "result": {
+        "kind": "signal_integrity",
+        "channels": {},
+        "summary": {
+          "verdict": "ok",
+          "n_channels": 0,
+          "n_ok": 0,
+          "n_degraded": 0,
+          "n_suspect": 0
+        }
+      }
+    },
+    {
+      "t": "2026-06-06T18:45:22+00:00",
+      "step_id": "verdict_note",
+      "type": "note",
+      "operator_input": ""
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {}
+}

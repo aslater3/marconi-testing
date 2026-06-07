@@ -973,3 +973,296 @@ def analyse_clock_health(captures: dict[str, Capture], params: dict) -> dict:
         out["verdict"] = (f"OUT OF TOLERANCE ({deviation_pct:.2f}% off, "
                           f"expected {expected_hz:,} Hz, tolerance {tolerance_pct:.1f}%)")
     return out
+
+
+# -----------------------------------------------------------------------------
+# protocol_decode — bus-protocol decoder (the missing piece)
+# -----------------------------------------------------------------------------
+# This analyser turns a raw LA capture into a per-event **decoded value
+# table** — hex / binary / decimal / signed — for whatever protocol the
+# operator is debugging. It's deliberately generic: the operator passes
+# a channel layout in `params`, and the analyser reports whatever values
+# it sees on those channels at each edge of the strobe/clock.
+#
+# Why this exists: every other analyser in the harness (bus_census,
+# contention, signal_integrity) tells you *something is wrong on this
+# line* but not *what value was being sent*. For the level-sweep test
+# you specifically asked for "decode what's being requested into binary
+# at each step or decode some true value" — this is the analyser that
+# does that. Without it, a fault on a single data line is invisible
+# unless you manually walk the VCD sample by sample.
+#
+# Three sample-rate / edge scenarios this handles:
+#  1. Synchronous bus, clock on a known channel — sample data on each
+#     rising clock edge, decode the bus.
+#  2. Asynchronous strobe (e.g. AD7522 LB/HB pulses) — sample data
+#     just before the strobe's rising edge, decode the bus.
+#  3. Edge-driven events (e.g. 74LS273 latch CLK) — sample data
+#     just before the CLK rising edge, decode the bus.
+#
+# params (passed in via the `analyse` step's `params` dict):
+#   mode:                  "clock_edge" | "strobe_rising" | "any_edge"
+#                          Default: "clock_edge"
+#   clock_channel:         which LA channel carries the clock/strobe (int)
+#   data_channels:         {bit_position: channel} — bit 0 = LSB
+#                          e.g. {0: 3, 1: 4, 2: 5, 3: 6, 4: 7, 5: 0, 6: 1, 7: 2}
+#                          for an 8-bit bus on LA CH4..CH8 + CH1..CH3
+#   enable_channel:        (optional) channel that must be LOW (or HIGH) for
+#                          the event to be counted. e.g. /CS, /WR, /OE.
+#                          Value: "low" means event counted when this is LOW.
+#                          Value: "high" means event counted when this is HIGH.
+#                          Default: no enable filter (count all clock edges).
+#   invert:                {channel: True} for active-low lines (default: {})
+#   signed:                bool — interpret MSB as sign (default: False)
+#   bit_positions:         (optional) explicit bit→channel map; if absent,
+#                          defaults to {0: data_channels[0], 1: data_channels[1], ...}
+#                          Use this when channels aren't in LSB-first order.
+#   level_markers:         (optional) list of VCD timestamps (in ns) the
+#                          operator logged via set_state("level_markers",
+#                          [...]) — used to bin decoded values by front-panel
+#                          level. The analyser walks level_markers in order
+#                          and reports a per-level table.
+#   expected:              (optional) per-level expected integer value (in
+#                          bus units) for the standard 1 dB sweep pattern.
+#                          e.g. for the fine attenuator: 0 at max level,
+#                          increasing as level decreases. The analyser
+#                          flags mismatches.
+#
+# Output:
+#   {
+#     "kind": "protocol_decode",
+#     "mode": "clock_edge",
+#     "n_events": <int>,        # number of clock/strobe edges captured
+#     "events": [
+#       {"idx": 0, "t_ns": 12345, "value": 0x55, "binary": "01010101",
+#        "decimal": 85, "signed": 85, "hex": "0x55"},
+#       ...
+#     ],
+#     "summary": {
+#       "n_unique_values": <int>,
+#       "min": <int>, "max": <int>,
+#       "monotonic": True|False,
+#       "duplicate_count": <int>
+#     },
+#     "per_level": [           # present only if level_markers were set
+#       {"level_idx": 0, "t_start_ns": ..., "t_end_ns": ..., "values": [...],
+#        "min": ..., "max": ..., "expected": ..., "match": True|False},
+#       ...
+#     ]
+#   }
+
+def _bits_to_value(channel_states_at_time: dict[int, int],
+                   bit_positions: dict[int, int],
+                   invert: dict[int, bool]) -> tuple[int, int]:
+    """Given a snapshot of {channel: 0|1} and a bit→channel map, return
+    (unsigned_value, signed_value) for a small fixed-width bus (≤16 bits).
+    """
+    unsigned = 0
+    for bit_pos, ch in bit_positions.items():
+        bit = channel_states_at_time.get(ch, 0)
+        if invert.get(ch, False):
+            bit ^= 1
+        if bit:
+            unsigned |= (1 << bit_pos)
+    # Signed: for ≤16 bit values, MSB is bit (max(bit_positions))
+    max_bit = max(bit_positions.keys()) if bit_positions else 0
+    if max_bit > 0 and (unsigned & (1 << max_bit)):
+        signed = unsigned - (1 << (max_bit + 1))
+    else:
+        signed = unsigned
+    return unsigned, signed
+
+
+def _state_at(transitions_by_ch: dict[int, list[tuple[int, int]]],
+              t_ns: int) -> dict[int, int]:
+    """For each channel, return the value it holds at time t_ns.
+    Walks the transition list once per channel; O(N) total per call.
+    """
+    state = {}
+    for ch, trans in transitions_by_ch.items():
+        # transitions are sorted by (t_ns, value); find the last entry
+        # with t_ns <= t_ns
+        v = 0
+        for t, val in trans:
+            if t <= t_ns:
+                v = val
+            else:
+                break
+        state[ch] = v
+    return state
+
+
+def analyse_protocol_decode(captures: dict, params: dict) -> dict:
+    """Decode a bus protocol from a LA capture. See module docstring for full
+    params documentation.
+    """
+    out: dict[str, Any] = {"kind": "protocol_decode", "events": []}
+
+    if not captures:
+        out["skipped"] = True
+        out["reason"] = "no capture available"
+        return out
+
+    cap = list(captures.values())[-1]
+    if not cap.vcd_path:
+        out["skipped"] = True
+        out["reason"] = "most recent capture has no VCD"
+        return out
+
+    mode = params.get("mode", "clock_edge")
+    clock_ch = params.get("clock_channel")
+    data_chs = params.get("data_channels", {})  # {bit_pos: channel}
+    enable_ch = params.get("enable_channel")
+    enable_polarity = params.get("enable_polarity", "low")  # "low" or "high"
+    invert = params.get("invert", {})
+    signed_flag = params.get("signed", False)
+    level_markers = params.get("level_markers", [])  # list of t_ns, sorted
+    expected = params.get("expected", [])           # list of ints, per level
+
+    out["mode"] = mode
+    out["clock_channel"] = clock_ch
+    out["data_channels"] = data_chs
+    out["enable_channel"] = enable_ch
+
+    if not data_chs:
+        out["error"] = "no data_channels specified"
+        return out
+
+    # Load all relevant channels
+    chs_needed = set(data_chs.values())
+    if clock_ch is not None:
+        chs_needed.add(clock_ch)
+    if enable_ch is not None:
+        chs_needed.add(enable_ch)
+
+    trans_by_ch: dict[int, list[tuple[int, int]]] = {}
+    for ch in chs_needed:
+        trans_by_ch[ch] = parse_vcd_transitions(cap.vcd_path, ch)
+
+    # Determine which edges are "events" to decode
+    if mode in ("clock_edge", "strobe_rising"):
+        if clock_ch is None:
+            out["error"] = f"mode={mode} requires clock_channel"
+            return out
+        # Use rising edges of the clock channel as the event times
+        events = [(t, 1) for t, v in trans_by_ch[clock_ch] if v == 1]
+    elif mode == "any_edge":
+        # Use every rising edge of every data channel (loose)
+        events = []
+        for ch in data_chs.values():
+            for t, v in trans_by_ch[ch]:
+                if v == 1:
+                    events.append((t, ch))
+        events.sort()
+    else:
+        out["error"] = f"unknown mode: {mode}"
+        return out
+
+    # Filter by enable
+    if enable_ch is not None and mode != "any_edge":
+        target_val = 0 if enable_polarity == "low" else 1
+        en_trans = trans_by_ch[enable_ch]
+        filtered = []
+        for t, _ in events:
+            en_state = 0
+            for et, ev in en_trans:
+                if et <= t:
+                    en_state = ev
+                else:
+                    break
+            if en_state == target_val:
+                filtered.append((t, _))
+        events = filtered
+
+    # Walk the events and decode the bus at each
+    decoded_events = []
+    for idx, (t, _src) in enumerate(events):
+        # Sample the bus *just before* the rising clock edge
+        sample_t = max(0, t - 1)  # 1 ns before the edge is safe enough
+        state = _state_at(trans_by_ch, sample_t)
+        unsigned, signed_v = _bits_to_value(state, data_chs, invert)
+        n_bits = (max(data_chs.keys()) + 1) if data_chs else 0
+        decoded_events.append({
+            "idx": idx,
+            "t_ns": t,
+            "value": unsigned,
+            "binary": format(unsigned, f"0{n_bits}b") if n_bits else "0",
+            "hex": f"0x{unsigned:0{(n_bits + 3) // 4}X}",
+            "decimal": unsigned,
+            "signed": signed_v,
+        })
+
+    out["n_events"] = len(decoded_events)
+    out["events"] = decoded_events
+
+    # Summary stats
+    if decoded_events:
+        values = [e["value"] for e in decoded_events]
+        out["summary"] = {
+            "n_unique_values": len(set(values)),
+            "min": min(values),
+            "max": max(values),
+            "monotonic": all(values[i] <= values[i + 1] for i in range(len(values) - 1))
+                        or all(values[i] >= values[i + 1] for i in range(len(values) - 1)),
+            "duplicate_count": len(values) - len(set(values)),
+        }
+    else:
+        out["summary"] = {"n_unique_values": 0, "min": None, "max": None,
+                          "monotonic": None, "duplicate_count": 0}
+
+    # Per-level binning (if level_markers supplied)
+    if level_markers:
+        per_level = []
+        # Build level windows: [marker[i], marker[i+1]) — last extends to end
+        n_levels = len(level_markers) + 1
+        for i in range(n_levels):
+            t_start = level_markers[i] if i < len(level_markers) else None
+            t_end = level_markers[i + 1] if (i + 1) < len(level_markers) else None
+            # Filter decoded_events to this window
+            window = []
+            for ev in decoded_events:
+                if t_start is not None and ev["t_ns"] < t_start:
+                    continue
+                if t_end is not None and ev["t_ns"] >= t_end:
+                    continue
+                window.append(ev)
+            vals = [w["value"] for w in window]
+            entry = {
+                "level_idx": i,
+                "t_start_ns": t_start,
+                "t_end_ns": t_end,
+                "n_events": len(window),
+                "values": [w["value"] for w in window],
+                "binaries": [w["binary"] for w in window],
+                "hexes": [w["hex"] for w in window],
+                "min": min(vals) if vals else None,
+                "max": max(vals) if vals else None,
+                "first": window[0]["value"] if window else None,
+                "last": window[-1]["value"] if window else None,
+            }
+            # Match against expected
+            if i < len(expected):
+                exp = expected[i]
+                if vals:
+                    entry["expected"] = exp
+                    entry["match_first"] = (window[0]["value"] == exp)
+                    entry["match_last"] = (window[-1]["value"] == exp)
+                    entry["match_min"] = (min(vals) == exp)
+                    entry["match_max"] = (max(vals) == exp)
+                else:
+                    entry["expected"] = exp
+                    entry["match_first"] = False
+                    entry["match_last"] = False
+            per_level.append(entry)
+        out["per_level"] = per_level
+
+        # Overall verdict
+        if expected and per_level:
+            matches = sum(1 for pl in per_level
+                          if pl.get("match_first") is True)
+            out["verdict"] = (f"{matches}/{len(per_level)} levels matched "
+                              f"expected on first decoded value")
+        else:
+            out["verdict"] = "no expected values provided"
+
+    return out

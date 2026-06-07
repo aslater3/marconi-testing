@@ -1569,6 +1569,330 @@ AA2_IC10_XCVR = TestDef(
 
 
 # -----------------------------------------------------------------------------
+
+
+# -----------------------------------------------------------------------------
+
+
+# -----------------------------------------------------------------------------
+# Test 14a: level_sweep_ls138 — 74LS138 protocol decode during level sweep
+# -----------------------------------------------------------------------------
+# Probes all 8 /Y outputs of a 74LS138. The 'event' on a 138 is the /Y
+# output going LOW (chip-select asserted). Mode 'any_edge' watches every
+# /Y falling edge and reports which one fired, with timestamp.
+# Sweep: +7 dBm → -5 dBm, 1 dBm step, 8 s settle, 13 levels, 15 s LA cap.
+# -----------------------------------------------------------------------------
+LEVEL_SWEEP_LS138 = TestDef(
+    name="level_sweep_ls138",
+    description=(
+        "Per-IC protocol decode for a 74LS138 (3-to-8 decoder) during a "
+        "+7 dBm → -5 dBm level sweep. All 8 /Y outputs probed. The "
+        "protocol_decode analyser reports which /Y fired and when, so a "
+        "stuck or missing /Y output is visible. Use this for AD4 IC1 "
+        "(the prime suspect), AA2/1 IC13, AA2/1 IC17, or any AC13 '138."
+    ),
+    steps=[
+        {"type": "prompt", "id": "intro", "text": (
+            "=== LEVEL SWEEP LS138 — 74LS138 protocol decode ===\n"
+            "Probe all 8 /Y outputs of a 74LS138. During the level sweep,\n"
+            "the analyser will report which /Y fires (goes LOW) and when.\n\n"
+            "PROBE MAP:\n"
+            "  LA CH1 (D0) → 74LS138.Pin15  /Y0\n"
+            "  LA CH2 (D1) → 74LS138.Pin14  /Y1\n"
+            "  LA CH3 (D2) → 74LS138.Pin13  /Y2\n"
+            "  LA CH4 (D3) → 74LS138.Pin12  /Y3\n"
+            "  LA CH5 (D4) → 74LS138.Pin11  /Y4\n"
+            "  LA CH6 (D5) → 74LS138.Pin10  /Y5\n"
+            "  LA CH7 (D6) → 74LS138.Pin9   /Y6\n"
+            "  LA CH8 (D7) → 74LS138.Pin7   /Y7\n\n"
+            "PROTOCOL:\n"
+            "  1) Clip LA channels to all 8 /Y outputs of the 74LS138\n"
+            "     you are testing (per the wiki probe map).\n"
+            "  2) GND clip on the board GND.\n"
+            "  3) Set RF level to +7 dBm, wait 8 s.\n"
+            "  4) Press ENTER to start the 15 s LA capture.\n"
+            "  5) Walk the sweep: press RF LEVEL ▼ once per second\n"
+            "     for 12 s, dropping +7 → +6 → ... → -5 dBm.\n"
+            "     (Yes, faster than 8s/level — the 138 only fires on\n"
+            "     the actual write, and we want to capture all 12\n"
+            "     transitions in the 15 s window.)\n"
+            "  6) Wait for LA capture to end (~15 s).\n\n"
+            "Press ENTER to begin."
+        ), "wait_for": "enter"},
+
+        {"type": "clip", "id": "clip_ls138",
+         "channels": list(range(8)),
+         "probes": {
+             0: "74LS138.Pin15  /Y0",
+             1: "74LS138.Pin14  /Y1",
+             2: "74LS138.Pin13  /Y2",
+             3: "74LS138.Pin12  /Y3",
+             4: "74LS138.Pin11  /Y4",
+             5: "74LS138.Pin10  /Y5",
+             6: "74LS138.Pin9   /Y6",
+             7: "74LS138.Pin7   /Y7",
+         },
+         "wait_for": "enter"},
+
+        {"type": "capture", "id": "cap_ls138_sweep",
+         "duration_s": 15.0,
+         "sample_rate_hz": 24_000_000,
+         "channels": list(range(8)),
+         "trigger": None},
+
+        {"type": "analyse", "id": "ana_census", "kind": "bus_census",
+         "params": {"reference": "self"}},
+        {"type": "analyse", "id": "ana_si", "kind": "signal_integrity",
+         "params": {}},
+
+        # Protocol decode for the 138: each channel is its own 'bit' in a
+        # synthetic 8-bit bus; we report which /Y was asserted (LOW) at
+        # each event. mode=any_edge catches every falling edge on any
+        # /Y output. The 8-bit value is 0xFF when no /Y is active, else
+        # 0xFE / 0xFD / ... / 0x7F (one bit cleared) when one /Y is LOW.
+        {"type": "analyse", "id": "ana_decode", "kind": "protocol_decode",
+         "params": {
+             "mode": "any_edge",
+             "data_channels": {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7},
+             "invert": {0: True, 1: True, 2: True, 3: True,
+                        4: True, 5: True, 6: True, 7: True},
+             "signed": False,
+         }},
+
+        {"type": "note", "id": "obs", "prompt": (
+            "INTERPRET:\n"
+            "  - n_events = number of /Y falling edges in the 15 s window.\n"
+            "    Expected: 12 (one per level transition).\n"
+            "  - Each event's 'hex' value tells you WHICH /Y fired:\n"
+            "      0xFE = /Y0, 0xFD = /Y1, 0xFB = /Y2, 0xF7 = /Y3\n"
+            "      0xEF = /Y4, 0xDF = /Y5, 0xBF = /Y6, 0x7F = /Y7\n"
+            "    If you see 0xFF or 0x00 throughout → no /Y is firing.\n"
+            "  - If the SAME /Y fires for multiple level changes → the\n"
+            "    138 is mis-decoding the address; address bus fault.\n"
+            "  - If NO /Y fires for some level changes → CPU didn't write\n"
+            "    to that latch on that step → CPU/address fault.\n"
+            "  - If multiple /Y fire simultaneously → 138 is shorted\n"
+            "    internally → replace.\n\n"
+            "Free-text observation:"
+        ), "multiline": True},
+    ],
+)
+
+
+# -----------------------------------------------------------------------------
+# Test 14b: level_sweep_ls273 — 74LS273 protocol decode during level sweep
+# -----------------------------------------------------------------------------
+# Probes the CLK input + 6 of 8 Q outputs. protocol_decode samples the
+# 6-bit Q bus just before each rising CLK edge and reports the captured
+# value. /CLR on CH2 must be HIGH throughout (active-low clear).
+# Sweep: +7 dBm → -5 dBm, 1 dBm step, 8 s settle, 13 levels, 15 s LA cap.
+# -----------------------------------------------------------------------------
+LEVEL_SWEEP_LS273 = TestDef(
+    name="level_sweep_ls273",
+    description=(
+        "Per-IC protocol decode for a 74LS273 (octal D-latch) during a "
+        "+7 dBm → -5 dBm level sweep. Probes CLK, /CLR, and 6 of 8 Q "
+        "outputs. The protocol_decode analyser samples Q0..Q5 just before "
+        "each rising CLK edge, decodes the 6-bit value, and reports "
+        "whether each level change actually latched new data. Use this "
+        "for AA2/1 IC20, AD2 IC1 (the A6L10 heat-stressed latch), AD4 "
+        "IC2/IC3/IC4, or any other 273 in the system."
+    ),
+    steps=[
+        {"type": "prompt", "id": "intro", "text": (
+            "=== LEVEL SWEEP LS273 — 74LS273 protocol decode ===\n"
+            "Probe CLK + /CLR + 6 Q outputs of a 74LS273. At each\n"
+            "level change, the rising CLK edge latches new data — the\n"
+            "analyser samples the Q bus and reports the latched value.\n\n"
+            "PROBE MAP:\n"
+            "  LA CH1 (D0) → 74LS273.Pin11  CLK  (event trigger)\n"
+            "  LA CH2 (D1) → 74LS273.Pin1   /CLR (must stay HIGH)\n"
+            "  LA CH3 (D2) → 74LS273.Pin19  Q0\n"
+            "  LA CH4 (D3) → 74LS273.Pin16  Q1\n"
+            "  LA CH5 (D4) → 74LS273.Pin15  Q2\n"
+            "  LA CH6 (D5) → 74LS273.Pin12  Q3\n"
+            "  LA CH7 (D6) → 74LS273.Pin9   Q4\n"
+            "  LA CH8 (D7) → 74LS273.Pin6   Q5\n\n"
+            "PROTOCOL:\n"
+            "  1) Clip LA channels to the 74LS273 per the wiki probe map.\n"
+            "  2) GND clip on board GND.\n"
+            "  3) Set RF level to +7 dBm, wait 8 s.\n"
+            "  4) Press ENTER to start the 15 s LA capture.\n"
+            "  5) Walk the sweep: press RF LEVEL ▼ once per second\n"
+            "     for 12 s, dropping +7 → +6 → ... → -5 dBm.\n"
+            "  6) Wait for LA capture to end.\n\n"
+            "Press ENTER to begin."
+        ), "wait_for": "enter"},
+
+        {"type": "clip", "id": "clip_ls273",
+         "channels": list(range(8)),
+         "probes": {
+             0: "74LS273.Pin11  CLK",
+             1: "74LS273.Pin1   /CLR (active-low, must be HIGH)",
+             2: "74LS273.Pin19  Q0",
+             3: "74LS273.Pin16  Q1",
+             4: "74LS273.Pin15  Q2",
+             5: "74LS273.Pin12  Q3",
+             6: "74LS273.Pin9   Q4",
+             7: "74LS273.Pin6   Q5",
+         },
+         "wait_for": "enter"},
+
+        {"type": "capture", "id": "cap_ls273_sweep",
+         "duration_s": 15.0,
+         "sample_rate_hz": 24_000_000,
+         "channels": list(range(8)),
+         "trigger": {"channel": 0, "edge": "rising"}},
+
+        {"type": "analyse", "id": "ana_census", "kind": "bus_census",
+         "params": {"reference": "self"}},
+        {"type": "analyse", "id": "ana_si", "kind": "signal_integrity",
+         "params": {}},
+
+        # protocol_decode: rising CLK edges are the events, /CLR is the
+        # enable filter (must be HIGH = not clearing). 6-bit Q bus on
+        # LA CH3..CH8 = data bits 0..5. We sample 1 ns before the rising
+        # edge to capture the settled Q values.
+        {"type": "analyse", "id": "ana_decode", "kind": "protocol_decode",
+         "params": {
+             "mode": "clock_edge",
+             "clock_channel": 0,
+             "data_channels": {0: 2, 1: 3, 2: 4, 3: 5, 4: 6, 5: 7},
+             "enable_channel": 1,
+             "enable_polarity": "high",
+             "signed": False,
+         }},
+
+        {"type": "note", "id": "obs", "prompt": (
+            "INTERPRET:\n"
+            "  - n_events = number of rising CLK edges in 15 s. Expected: ~12.\n"
+            "  - Each event's 'hex' is the 6-bit value latched on the Q outputs\n"
+            "    (Q5..Q0 in MSB-first order). E.g. 0x15 = 010101 = Q5=0 Q4=1 Q3=0 Q2=1 Q1=0 Q0=1.\n"
+            "  - If n_events < 12 → CPU is not clocking this latch on every\n"
+            "    level change → either CPU fault, CLK not connected, or the\n"
+            "    /CLR is being asserted.\n"
+            "  - If n_events >= 12 but values are all the SAME → data inputs\n"
+            "    are stuck or the latch is opaque to the bus.\n"
+            "  - If two adjacent events have the same value when they should\n"
+            "    differ → that Q output is stuck.\n"
+            "  - summary.duplicate_count tells you how many repeats there\n"
+            "    were. 0 is ideal for a sweep that should monotonically\n"
+            "    change.\n\n"
+            "Free-text observation:"
+        ), "multiline": True},
+    ],
+)
+
+
+# -----------------------------------------------------------------------------
+# Test 14c: level_sweep_dac — AD7522 protocol decode during level sweep
+# -----------------------------------------------------------------------------
+# Probes LB, HB, LDAC + 5 data bits (DB3..DB7). protocol_decode samples
+# the 5-bit data bus on each LB rising edge, decodes the low-byte value
+# being requested. This is the test that answers "is the CPU asking the
+# DAC for the right code at each level?"
+# Sweep: +7 dBm → -5 dBm, 1 dBm step, 8 s settle, 13 levels, 15 s LA cap.
+# -----------------------------------------------------------------------------
+LEVEL_SWEEP_DAC = TestDef(
+    name="level_sweep_dac",
+    description=(
+        "Per-IC protocol decode for the AD7522LN DAC during a +7 dBm → "
+        "-5 dBm level sweep. Probes LB, HB, LDAC, and 5 data bits "
+        "(DB3..DB7). The protocol_decode analyser samples the 5-bit data "
+        "bus on each LB rising edge, decodes the low-byte value being "
+        "requested, and reports whether each level change carried the "
+        "expected code. Use this on AC4 IC6."
+    ),
+    steps=[
+        {"type": "prompt", "id": "intro", "text": (
+            "=== LEVEL SWEEP DAC — AD7522 protocol decode ===\n"
+            "Probe LB, HB, LDAC, and 5 of 8 data bits. At each level\n"
+            "change, the CPU issues an LB strobe with new data — the\n"
+            "analyser samples the 5-bit slice and reports the value.\n\n"
+            "PROBE MAP (per wiki dac-bit-and-latch-verification.md):\n"
+            "  LA CH1 (D0) → AD7522.Pin24  LB   (event trigger)\n"
+            "  LA CH2 (D1) → AD7522.Pin25  HB   (qualifier — must follow LB)\n"
+            "  LA CH3 (D2) → AD7522.Pin21  LDAC (qualifier — must follow HB)\n"
+            "  LA CH4 (D3) → AD7522.Pin15  DB4  (data bit 4)\n"
+            "  LA CH5 (D4) → AD7522.Pin14  DB5  (data bit 5)\n"
+            "  LA CH6 (D5) → AD7522.Pin13  DB6  (data bit 6)\n"
+            "  LA CH7 (D6) → AD7522.Pin12  DB7  (data bit 7 — MSB of low byte)\n"
+            "  LA CH8 (D7) → AD7522.Pin16  DB3  (data bit 3)\n\n"
+            "NOTE: this captures a 5-bit slice (DB3..DB7) of the low byte.\n"
+            "For the full 10-bit decode, use Second Function 3 (manual\n"
+            "mode) per dac-bit-and-latch-verification.md. This test tells\n"
+            "you the bus is requesting values at the right moments.\n\n"
+            "PROTOCOL:\n"
+            "  1) Clip LA channels to AC4 IC6 per the wiki.\n"
+            "  2) GND clip on AC4 GND (Pin 7 = DGND).\n"
+            "  3) Set RF level to +7 dBm, wait 8 s.\n"
+            "  4) Press ENTER to start the 15 s LA capture.\n"
+            "  5) Walk the sweep: press RF LEVEL ▼ once per second\n"
+            "     for 12 s, dropping +7 → +6 → ... → -5 dBm.\n"
+            "  6) Wait for LA capture to end.\n\n"
+            "Press ENTER to begin."
+        ), "wait_for": "enter"},
+
+        {"type": "clip", "id": "clip_dac",
+         "channels": list(range(8)),
+         "probes": {
+             0: "AD7522.Pin24  LB   (low byte strobe — event trigger)",
+             1: "AD7522.Pin25  HB   (high byte strobe)",
+             2: "AD7522.Pin21  LDAC (transfer to DAC register)",
+             3: "AD7522.Pin15  DB4",
+             4: "AD7522.Pin14  DB5",
+             5: "AD7522.Pin13  DB6",
+             6: "AD7522.Pin12  DB7  (MSB of low byte)",
+             7: "AD7522.Pin16  DB3",
+         },
+         "wait_for": "enter"},
+
+        {"type": "capture", "id": "cap_dac_sweep",
+         "duration_s": 15.0,
+         "sample_rate_hz": 24_000_000,
+         "channels": list(range(8)),
+         "trigger": {"channel": 0, "edge": "rising"}},
+
+        {"type": "analyse", "id": "ana_census", "kind": "bus_census",
+         "params": {"reference": "self"}},
+        {"type": "analyse", "id": "ana_si", "kind": "signal_integrity",
+         "params": {}},
+
+        # protocol_decode: rising LB edges are the events, HB is the
+        # enable filter (must follow LB within a few µs — no enable
+        # filter set, we want to see all LB events regardless). 5-bit
+        # data bus on LA CH4..CH8 = bits 3..7.
+        {"type": "analyse", "id": "ana_decode", "kind": "protocol_decode",
+         "params": {
+             "mode": "clock_edge",
+             "clock_channel": 0,
+             "data_channels": {3: 3, 4: 4, 5: 5, 6: 6, 7: 7},
+             "signed": False,
+         }},
+
+        {"type": "note", "id": "obs", "prompt": (
+            "INTERPRET:\n"
+            "  - n_events = number of LB rising edges in 15 s. Expected: ~12.\n"
+            "  - Each event's 'hex' is the 5-bit data slice (DB7..DB3) being\n"
+            "    written. The actual full 10-bit DAC code is HB-A7L3*256 +\n"
+            "    LB-A7L2, but the LB values should monotonically change with\n"
+            "    each 1 dBm step in the sweep direction.\n"
+            "  - If n_events < 12 → CPU is not writing the DAC on every\n"
+            "    step → CPU/AC13 fault, or LDAC firing without LB.\n"
+            "  - HB and LDAC counts (from bus_census) should each be ~12.\n"
+            "    If HB count = 0 → high byte never written → 138 mis-decoding.\n"
+            "    If LDAC count = 0 → DAC register never updated → final\n"
+            "    analog output is stale.\n"
+            "  - signal_integrity verdict on CH1 (LB): if 'suspect' →\n"
+            "    LB has sub-100ns oscillation = bus contention on the LB\n"
+            "    line. The original shark-fin fault mode.\n\n"
+            "Free-text observation:"
+        ), "multiline": True},
+    ],
+)
+
+
+# -----------------------------------------------------------------------------
 # Registry
 # -----------------------------------------------------------------------------
 REGISTRY: dict[str, TestDef] = {
@@ -1587,6 +1911,9 @@ REGISTRY: dict[str, TestDef] = {
     "aa2_ic10_xcvr": AA2_IC10_XCVR,
     "aa2_ls138_isolation": AA2_LS138_ISOLATION,
     "aa2_ls138_inputs": AA2_LS138_INPUTS,
+    "level_sweep_ls138": LEVEL_SWEEP_LS138,
+    "level_sweep_ls273": LEVEL_SWEEP_LS273,
+    "level_sweep_dac": LEVEL_SWEEP_DAC,
 }
 
 

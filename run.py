@@ -182,6 +182,8 @@ def _execute_step(step: dict, step_num: int, total: int, report: Report,
                 result = analyse_clock_health(captures, params)
             elif kind == "signal_integrity":
                 result = analyse_signal_integrity(captures, params)
+            elif kind == "protocol_decode":
+                result = analyse_protocol_decode(captures, params)
             else:
                 ui.warn(f"unknown analysis kind: {kind}")
                 return
@@ -298,6 +300,45 @@ def _execute_step(step: dict, step_num: int, total: int, report: Report,
                     else:
                         diff_str = ""
                     print(f"    code={code:>5}  measured={val} V  expected={exp} V  {tag}{diff_str}")
+            elif kind == "protocol_decode":
+                n = result.get("n_events", 0)
+                s = result.get("summary", {})
+                print(f"    {ui.BOLD}n_events={n}{ui.RESET}  "
+                      f"unique={s.get('n_unique_values', '?')}  "
+                      f"min={s.get('min', '?')}  max={s.get('max', '?')}  "
+                      f"monotonic={s.get('monotonic', '?')}  "
+                      f"dupes={s.get('duplicate_count', '?')}")
+                evs = result.get("events", [])
+                if evs:
+                    # Show first 5 + last 3 to keep output bounded
+                    show = evs[:5] + (["..."] if len(evs) > 8 else []) + evs[-3:] if len(evs) > 8 else evs
+                    print(f"    {ui.DIM}first/last decoded values (hex / binary / dec):{ui.RESET}")
+                    for e in show:
+                        if e == "...":
+                            print(f"    {ui.DIM}  ...{ui.RESET}")
+                            continue
+                        print(f"    t={e['t_ns']:>8} ns  {e['hex']:>6}  "
+                              f"{e['binary']:>10}  dec={e['decimal']:>4}"
+                              f"  signed={e['signed']:>4}")
+                # Per-level table if present
+                pl = result.get("per_level", [])
+                if pl:
+                    print(f"    {ui.DIM}per-level table (decoded bus values binned by level marker):{ui.RESET}")
+                    for entry in pl:
+                        n = entry.get("n_events", 0)
+                        mn = entry.get("min", "?")
+                        mx = entry.get("max", "?")
+                        first = entry.get("first", "?")
+                        last = entry.get("last", "?")
+                        exp = entry.get("expected")
+                        match = entry.get("match_first")
+                        tag = (f"{ui.GREEN}✓{ui.RESET}" if match is True
+                               else (f"{ui.RED}✗{ui.RESET}" if match is False
+                                     else "?"))
+                        exp_str = f"  expected={exp} {tag}" if exp is not None else ""
+                        print(f"    level {entry['level_idx']:>2}: "
+                              f"n={n:>2}  min={mn}  max={mx}  "
+                              f"first={first}  last={last}{exp_str}")
             elif kind == "bus_e2e":
                 s = result.get("summary", {})
                 print(f"    verdict: {ui.BOLD}{s.get('verdict', '?')}{ui.RESET}")
