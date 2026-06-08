@@ -1,0 +1,330 @@
+{
+  "schema_version": 1,
+  "test": "level_sweep_dac",
+  "test_description": "Per-IC protocol decode for the AD7522LN DAC during a +7 dBm \u2192 -5 dBm level sweep. Probes LBS, HBS, LDAC, and 5 data bits (DB0..DB4 \u2014 the LSBs of the low byte). The protocol_decode analyser samples the 5-bit data bus on each LBS rising edge and reports the low-byte value being requested. **This probe map is tuned for 1 dB steps that move the BOTTOM of the byte** \u2014 if TP2 is known to move on each step (per `fine-attenuator-non-linearity.md`), the level-change data lives in DB0..DB4, not DB3..DB7. For the full 10-bit decode, use Second Function 3 (manual mode) per dac-bit-and-latch-verification.md. Use this on AC4 IC6.",
+  "operator": "andy",
+  "hostname": "andys-MacBook-Pro.local",
+  "started_at": "2026-06-08T12:27:57+00:00",
+  "finished_at": "2026-06-08T12:31:55+00:00",
+  "hardware": "simulate",
+  "captures": {
+    "cap_dac_sweep": {
+      "name": "cap_dac_sweep",
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "duration_s": 15.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 0,
+        "edge": "rising"
+      },
+      "raw_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_dac_sweep_20260608_133144.raw",
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_dac_sweep_20260608_133144.vcd.gz",
+      "captured_at": "20260608_133144",
+      "mode": "simulate",
+      "notes": "synthetic VCD, pattern=clean_strobe, scaled to 1000 samples for speed"
+    }
+  },
+  "events": [
+    {
+      "t": "2026-06-08T12:31:44+00:00",
+      "step_id": "clip_dac",
+      "type": "clip",
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "probes": {
+        "0": "AD7522.Pin24  LBS  (low byte strobe \u2014 event trigger)",
+        "1": "AD7522.Pin25  HBS  (high byte strobe)",
+        "2": "AD7522.Pin22  LDAC (transfer to DAC register)",
+        "3": "AD7522.Pin19  DB0  (LSB of low byte)",
+        "4": "AD7522.Pin18  DB1",
+        "5": "AD7522.Pin17  DB2",
+        "6": "AD7522.Pin16  DB3",
+        "7": "AD7522.Pin15  DB4  (MSB of probed slice)"
+      },
+      "text": "Clip the channels:"
+    },
+    {
+      "t": "2026-06-08T12:31:44+00:00",
+      "step_id": "cap_dac_sweep",
+      "type": "capture",
+      "capture_id": "cap_dac_sweep",
+      "mode": "simulate",
+      "duration_s": 15.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 1000,
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_dac_sweep_20260608_133144.vcd.gz"
+    },
+    {
+      "t": "2026-06-08T12:31:44+00:00",
+      "step_id": "ana_census",
+      "type": "analysis",
+      "kind": "bus_census",
+      "params": {
+        "reference": "self"
+      },
+      "result": {
+        "kind": "bus_census",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 0,
+            "n_rising": 0,
+            "n_falling": 0,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "constant",
+            "notes": "no transitions (stuck at 0)"
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 1,
+            "n_rising": 1,
+            "n_falling": 0,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          }
+        }
+      }
+    },
+    {
+      "t": "2026-06-08T12:31:44+00:00",
+      "step_id": "ana_si",
+      "type": "analysis",
+      "kind": "signal_integrity",
+      "params": {},
+      "result": {
+        "kind": "signal_integrity",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 0,
+            "n_intervals": 0,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": null,
+            "median_gap_ns": null,
+            "max_gap_ns": null,
+            "health": "ok",
+            "notes": "fewer than 2 edges \u2014 no intervals to analyse"
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 0,
+            "n_intervals": 0,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": null,
+            "median_gap_ns": null,
+            "max_gap_ns": null,
+            "health": "ok",
+            "notes": "fewer than 2 edges \u2014 no intervals to analyse"
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 0,
+            "n_intervals": 0,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": null,
+            "median_gap_ns": null,
+            "max_gap_ns": null,
+            "health": "ok",
+            "notes": "fewer than 2 edges \u2014 no intervals to analyse"
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 0,
+            "n_intervals": 0,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": null,
+            "median_gap_ns": null,
+            "max_gap_ns": null,
+            "health": "ok",
+            "notes": "fewer than 2 edges \u2014 no intervals to analyse"
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 0,
+            "n_intervals": 0,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": null,
+            "median_gap_ns": null,
+            "max_gap_ns": null,
+            "health": "ok",
+            "notes": "fewer than 2 edges \u2014 no intervals to analyse"
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 0,
+            "n_intervals": 0,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": null,
+            "median_gap_ns": null,
+            "max_gap_ns": null,
+            "health": "ok",
+            "notes": "fewer than 2 edges \u2014 no intervals to analyse"
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 0,
+            "n_intervals": 0,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": null,
+            "median_gap_ns": null,
+            "max_gap_ns": null,
+            "health": "ok",
+            "notes": "fewer than 2 edges \u2014 no intervals to analyse"
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 1,
+            "n_intervals": 0,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": null,
+            "median_gap_ns": null,
+            "max_gap_ns": null,
+            "health": "ok",
+            "notes": "fewer than 2 edges \u2014 no intervals to analyse"
+          }
+        },
+        "summary": {
+          "verdict": "OK \u2014 all 8 channel(s) clean",
+          "n_channels": 8,
+          "n_ok": 8,
+          "n_degraded": 0,
+          "n_suspect": 0,
+          "pct_sub100ns_overall": 0.0
+        }
+      }
+    },
+    {
+      "t": "2026-06-08T12:31:44+00:00",
+      "step_id": "ana_decode",
+      "type": "analysis",
+      "kind": "protocol_decode",
+      "params": {
+        "mode": "clock_edge",
+        "clock_channel": 0,
+        "data_channels": {
+          "0": 3,
+          "1": 4,
+          "2": 5,
+          "3": 6,
+          "4": 7
+        },
+        "sample_point": "after",
+        "sample_offset_ns": 100,
+        "signed": false
+      },
+      "result": {
+        "kind": "protocol_decode",
+        "events": [],
+        "mode": "clock_edge",
+        "clock_channel": 0,
+        "data_channels": {
+          "0": 3,
+          "1": 4,
+          "2": 5,
+          "3": 6,
+          "4": 7
+        },
+        "enable_channel": null,
+        "n_events": 0,
+        "summary": {
+          "n_unique_values": 0,
+          "min": null,
+          "max": null,
+          "monotonic": null,
+          "duplicate_count": 0
+        }
+      }
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {}
+}

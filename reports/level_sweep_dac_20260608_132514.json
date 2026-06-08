@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "test": "level_sweep_dac",
+  "test_description": "Per-IC protocol decode for the AD7522LN DAC during a +7 dBm \u2192 -5 dBm level sweep. Probes LB, HB, LDAC, and 5 data bits (DB3..DB7). The protocol_decode analyser samples the 5-bit data bus on each LB rising edge, decodes the low-byte value being requested, and reports whether each level change carried the expected code. Use this on AC4 IC6.",
+  "operator": "andy",
+  "hostname": "andys-MacBook-Pro.local",
+  "started_at": "2026-06-08T12:24:55+00:00",
+  "finished_at": "2026-06-08T12:25:14+00:00",
+  "hardware": "fx2lafw 24MHz 8ch",
+  "captures": {},
+  "events": [],
+  "verdicts": [],
+  "sticky_state": {}
+}

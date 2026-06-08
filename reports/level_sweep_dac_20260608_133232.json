@@ -1,0 +1,508 @@
+{
+  "schema_version": 1,
+  "test": "level_sweep_dac",
+  "test_description": "Per-IC protocol decode for the AD7522LN DAC during a +7 dBm \u2192 -5 dBm level sweep. Probes LBS, HBS, LDAC, and 5 data bits (DB0..DB4 \u2014 the LSBs of the low byte). The protocol_decode analyser samples the 5-bit data bus on each LBS rising edge and reports the low-byte value being requested. **This probe map is tuned for 1 dB steps that move the BOTTOM of the byte** \u2014 if TP2 is known to move on each step (per `fine-attenuator-non-linearity.md`), the level-change data lives in DB0..DB4, not DB3..DB7. For the full 10-bit decode, use Second Function 3 (manual mode) per dac-bit-and-latch-verification.md. Use this on AC4 IC6.",
+  "operator": "andy",
+  "hostname": "andys-MacBook-Pro.local",
+  "started_at": "2026-06-08T12:32:00+00:00",
+  "finished_at": "2026-06-08T12:32:32+00:00",
+  "hardware": "fx2lafw 24MHz 8ch",
+  "captures": {
+    "cap_dac_sweep": {
+      "name": "cap_dac_sweep",
+      "sample_rate_hz": 24000000,
+      "n_samples": 360000000,
+      "duration_s": 15.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 0,
+        "edge": "rising"
+      },
+      "raw_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_dac_sweep_20260608_133203.raw",
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_dac_sweep_20260608_133203.vcd.gz",
+      "captured_at": "20260608_133203",
+      "mode": "hardware",
+      "notes": "captured via sigrok-cli fx2lafw (Saleae Logic 8ch/24MHz)"
+    }
+  },
+  "events": [
+    {
+      "t": "2026-06-08T12:32:03+00:00",
+      "step_id": "clip_dac",
+      "type": "clip",
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "probes": {
+        "0": "AD7522.Pin24  LBS  (low byte strobe \u2014 event trigger)",
+        "1": "AD7522.Pin25  HBS  (high byte strobe)",
+        "2": "AD7522.Pin22  LDAC (transfer to DAC register)",
+        "3": "AD7522.Pin19  DB0  (LSB of low byte)",
+        "4": "AD7522.Pin18  DB1",
+        "5": "AD7522.Pin17  DB2",
+        "6": "AD7522.Pin16  DB3",
+        "7": "AD7522.Pin15  DB4  (MSB of probed slice)"
+      },
+      "text": "Clip the channels:"
+    },
+    {
+      "t": "2026-06-08T12:32:18+00:00",
+      "step_id": "cap_dac_sweep",
+      "type": "capture",
+      "capture_id": "cap_dac_sweep",
+      "mode": "hardware",
+      "duration_s": 15.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 360000000,
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_dac_sweep_20260608_133203.vcd.gz"
+    },
+    {
+      "t": "2026-06-08T12:32:18+00:00",
+      "step_id": "ana_census",
+      "type": "analysis",
+      "kind": "bus_census",
+      "params": {
+        "reference": "self"
+      },
+      "result": {
+        "kind": "bus_census",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 39,
+            "n_rising": 19,
+            "n_falling": 20,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 81,
+            "n_rising": 40,
+            "n_falling": 41,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 81,
+            "n_rising": 40,
+            "n_falling": 41,
+            "first_state": 0,
+            "last_state": 0,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 1125,
+            "n_rising": 563,
+            "n_falling": 562,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 1147,
+            "n_rising": 574,
+            "n_falling": 573,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 1153,
+            "n_rising": 577,
+            "n_falling": 576,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 1307,
+            "n_rising": 654,
+            "n_falling": 653,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 1125,
+            "n_rising": 563,
+            "n_falling": 562,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          }
+        }
+      }
+    },
+    {
+      "t": "2026-06-08T12:32:18+00:00",
+      "step_id": "ana_si",
+      "type": "analysis",
+      "kind": "signal_integrity",
+      "params": {},
+      "result": {
+        "kind": "signal_integrity",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 39,
+            "n_intervals": 38,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": 561541,
+            "median_gap_ns": 29144875,
+            "max_gap_ns": 1163771875,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 81,
+            "n_intervals": 80,
+            "n_sub100ns": 9,
+            "pct_sub100ns": 11.25,
+            "min_gap_ns": 83,
+            "median_gap_ns": 561542,
+            "max_gap_ns": 1163601917,
+            "health": "degraded",
+            "notes": "11.2% of intervals are sub-100ns \u2014 mild aliasing. Worth a scope check on this signal."
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 81,
+            "n_intervals": 80,
+            "n_sub100ns": 10,
+            "pct_sub100ns": 12.5,
+            "min_gap_ns": 83,
+            "median_gap_ns": 561542,
+            "max_gap_ns": 1163601917,
+            "health": "degraded",
+            "notes": "12.5% of intervals are sub-100ns \u2014 mild aliasing. Worth a scope check on this signal."
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 1125,
+            "n_intervals": 1124,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": 4916,
+            "median_gap_ns": 301417,
+            "max_gap_ns": 1010591334,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 1147,
+            "n_intervals": 1146,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": 4916,
+            "median_gap_ns": 301375,
+            "max_gap_ns": 1010591375,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 1153,
+            "n_intervals": 1152,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": 4958,
+            "median_gap_ns": 301375,
+            "max_gap_ns": 1010591334,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 1307,
+            "n_intervals": 1306,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": 4958,
+            "median_gap_ns": 301334,
+            "max_gap_ns": 1010591291,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 1125,
+            "n_intervals": 1124,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": 4916,
+            "median_gap_ns": 301375,
+            "max_gap_ns": 1010591334,
+            "health": "ok",
+            "notes": ""
+          }
+        },
+        "summary": {
+          "verdict": "DEGRADED \u2014 2 channel(s) showing mild aliasing",
+          "n_channels": 8,
+          "n_ok": 6,
+          "n_degraded": 2,
+          "n_suspect": 0,
+          "pct_sub100ns_overall": 0.31
+        }
+      }
+    },
+    {
+      "t": "2026-06-08T12:32:18+00:00",
+      "step_id": "ana_decode",
+      "type": "analysis",
+      "kind": "protocol_decode",
+      "params": {
+        "mode": "clock_edge",
+        "clock_channel": 0,
+        "data_channels": {
+          "0": 3,
+          "1": 4,
+          "2": 5,
+          "3": 6,
+          "4": 7
+        },
+        "sample_point": "after",
+        "sample_offset_ns": 100,
+        "signed": false
+      },
+      "result": {
+        "kind": "protocol_decode",
+        "events": [
+          {
+            "idx": 0,
+            "t_ns": 755074083,
+            "value": 31,
+            "binary": "11111",
+            "hex": "0x1F",
+            "decimal": 31,
+            "signed": -1
+          },
+          {
+            "idx": 1,
+            "t_ns": 1383331458,
+            "value": 31,
+            "binary": "11111",
+            "hex": "0x1F",
+            "decimal": 31,
+            "signed": -1
+          },
+          {
+            "idx": 2,
+            "t_ns": 2025578125,
+            "value": 31,
+            "binary": "11111",
+            "hex": "0x1F",
+            "decimal": 31,
+            "signed": -1
+          },
+          {
+            "idx": 3,
+            "t_ns": 2654569500,
+            "value": 31,
+            "binary": "11111",
+            "hex": "0x1F",
+            "decimal": 31,
+            "signed": -1
+          },
+          {
+            "idx": 4,
+            "t_ns": 3301528833,
+            "value": 31,
+            "binary": "11111",
+            "hex": "0x1F",
+            "decimal": 31,
+            "signed": -1
+          },
+          {
+            "idx": 5,
+            "t_ns": 3928749750,
+            "value": 31,
+            "binary": "11111",
+            "hex": "0x1F",
+            "decimal": 31,
+            "signed": -1
+          },
+          {
+            "idx": 6,
+            "t_ns": 4457944667,
+            "value": 31,
+            "binary": "11111",
+            "hex": "0x1F",
+            "decimal": 31,
+            "signed": -1
+          },
+          {
+            "idx": 7,
+            "t_ns": 4893344083,
+            "value": 31,
+            "binary": "11111",
+            "hex": "0x1F",
+            "decimal": 31,
+            "signed": -1
+          },
+          {
+            "idx": 8,
+            "t_ns": 5378213167,
+            "value": 31,
+            "binary": "11111",
+            "hex": "0x1F",
+            "decimal": 31,
+            "signed": -1
+          },
+          {
+            "idx": 9,
+            "t_ns": 5738433125,
+            "value": 31,
+            "binary": "11111",
+            "hex": "0x1F",
+            "decimal": 31,
+            "signed": -1
+          },
+          {
+            "idx": 10,
+            "t_ns": 6121446583,
+            "value": 31,
+            "binary": "11111",
+            "hex": "0x1F",
+            "decimal": 31,
+            "signed": -1
+          },
+          {
+            "idx": 11,
+            "t_ns": 6476361458,
+            "value": 31,
+            "binary": "11111",
+            "hex": "0x1F",
+            "decimal": 31,
+            "signed": -1
+          },
+          {
+            "idx": 12,
+            "t_ns": 6506067875,
+            "value": 31,
+            "binary": "11111",
+            "hex": "0x1F",
+            "decimal": 31,
+            "signed": -1
+          },
+          {
+            "idx": 13,
+            "t_ns": 6551688625,
+            "value": 31,
+            "binary": "11111",
+            "hex": "0x1F",
+            "decimal": 31,
+            "signed": -1
+          },
+          {
+            "idx": 14,
+            "t_ns": 6913171958,
+            "value": 31,
+            "binary": "11111",
+            "hex": "0x1F",
+            "decimal": 31,
+            "signed": -1
+          },
+          {
+            "idx": 15,
+            "t_ns": 7886298333,
+            "value": 31,
+            "binary": "11111",
+            "hex": "0x1F",
+            "decimal": 31,
+            "signed": -1
+          },
+          {
+            "idx": 16,
+            "t_ns": 8518483167,
+            "value": 31,
+            "binary": "11111",
+            "hex": "0x1F",
+            "decimal": 31,
+            "signed": -1
+          },
+          {
+            "idx": 17,
+            "t_ns": 9000196458,
+            "value": 31,
+            "binary": "11111",
+            "hex": "0x1F",
+            "decimal": 31,
+            "signed": -1
+          },
+          {
+            "idx": 18,
+            "t_ns": 10164529875,
+            "value": 31,
+            "binary": "11111",
+            "hex": "0x1F",
+            "decimal": 31,
+            "signed": -1
+          }
+        ],
+        "mode": "clock_edge",
+        "clock_channel": 0,
+        "data_channels": {
+          "0": 3,
+          "1": 4,
+          "2": 5,
+          "3": 6,
+          "4": 7
+        },
+        "enable_channel": null,
+        "n_events": 19,
+        "summary": {
+          "n_unique_values": 1,
+          "min": 31,
+          "max": 31,
+          "monotonic": true,
+          "duplicate_count": 18
+        }
+      }
+    },
+    {
+      "t": "2026-06-08T12:32:32+00:00",
+      "step_id": "obs",
+      "type": "note",
+      "operator_input": "7dbm down to -10dbm"
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {}
+}
