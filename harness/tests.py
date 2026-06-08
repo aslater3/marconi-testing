@@ -54,10 +54,26 @@ BUS_CENSUS = TestDef(
             "Goal: identify which address/data line is the contention source.\n"
             "We'll baseline AA2/1 alone, then add each recipient board one at a time "
             "and watch for the shark-fin return.\n\n"
+            "ORIENTATION / SETUP:\n"
+            "  - This is a CROSS-BOARD test: it requires AA2/1 (CPU board, on top)\n"
+            "    AND a recipient board to be reachable at the same time. On the\n"
+            "    Marconi 2019A the recipient boards (AC3, AC4, AC13, AD2, AD4)\n"
+            "    sit in the lower RF box and are only accessible when the unit\n"
+            "    is INVERTED (upside down). Plan an inversion session for this\n"
+            "    test. The AA2/1-only sub-tests (aa2_cpu_health, aa2_ic11_alone,\n"
+            "    etc.) do NOT need inversion.\n"
+            "  - The 2019A's three-box stack (RF deck, synth, digital) is held\n"
+            "    together by screws on the corners and the back-panel. Mark the\n"
+            "    stack orientation with tape before inverting.\n"
+            "  - Ribbon cable reach: IC11 is on AA2/1 (top), the recipient IC6\n"
+            "    is on AC4 (bottom). With the unit inverted and the lids off,\n"
+            "    the ribbon cable between them will be longer than usual — be\n"
+            "    careful not to stress the IDC connectors.\n\n"
             "PRE-REQUISITES:\n"
             "  - 2019A powered OFF and unplugged from mains\n"
+            "  - Unit inverted (for cross-board reach), lids off, ESD strap on\n"
             "  - Logic analyser plugged in, driver loaded (fx2lafw)\n"
-            "  - Ground clip on AA2/1 GND (e.g. Pin 8 of any 74LSxx)\n"
+            "  - Ground clip on AA2/1 GND (e.g. Pin 10 of any 74LSxx)\n"
             "  - 8 channel clips on the bus lines\n\n"
             "Press ENTER when ready to start."
         ), "wait_for": "enter"},
@@ -224,8 +240,19 @@ CONTENTION = TestDef(
             "Target: the 'C' address line (AA2/1 IC11 Pin 18).\n"
             "This is the line that showed the 'shark fin' on the scope. The LA will show "
             "us the exact moment a second driver is fighting IC11.\n\n"
+            "ORIENTATION / SETUP:\n"
+            "  - This is a CROSS-BOARD test: probes go on AA2/1 (top, normal\n"
+            "    orientation) AND on a recipient 74LS138 (lower box, only\n"
+            "    accessible when the unit is INVERTED). Plan an inversion\n"
+            "    session. The 2019A's three-box stack needs to come apart\n"
+            "    carefully — mark the orientation with tape before inverting.\n"
+            "  - Ribbon cable reach: IC11 on AA2/1 and the recipient 138 on\n"
+            "    the lower board are normally several inches apart in the\n"
+            "    inverted position. The 8 LA clips need ~6\" of lead each.\n\n"
             "PRE-REQUISITES:\n"
-            "  - 2019A fully assembled, all boards in place\n"
+            "  - 2019A fully assembled, all boards in place (or per the\n"
+            "    bus_census test's add-board sequence)\n"
+            "  - Unit inverted (recipient boards reachable)\n"
             "  - LA CH1 (sigrok D0) on AA2/1 IC11.Pin18 (the 'C' line)\n"
             "  - LA CH2 (sigrok D1) on any chip-select (e.g. AD4 IC1 Pin 15, /Y0 output of 74LS138)\n"
             "  - LA CH3-CH8 (sigrok D2-D7) on other 74LS138 Y-outputs or 74LS273 outputs\n"
@@ -276,6 +303,12 @@ GOOD_VS_BAD = TestDef(
             "  (B) BAD:  a DAC write that produces no level change / wrong level\n\n"
             "The diff will show you the first sample where the two captures diverge, "
             "and on which channel. That's the smoking gun.\n\n"
+            "ORIENTATION / SETUP:\n"
+            "  - This is a CROSS-BOARD test: probes on AA2/1 (top) + AC4 + AD4\n"
+            "    (lower box). Unit must be INVERTED for the AD4/AC4 clips.\n"
+            "  - The DMM is on AC4 TP2, which is also in the lower box — plan\n"
+            "    the DMM lead routing before inverting (long test-lead leads\n"
+            "    can pick up noise on TP2).\n\n"
             "Press ENTER to start."
         ), "wait_for": "enter"},
 
@@ -286,8 +319,8 @@ GOOD_VS_BAD = TestDef(
              1: "AA2/1 IC11.Pin16 (bus 'B' address line)",
              2: "AA2/1 IC11.Pin14 (bus 'A' address line)",
              3: "AC4 AD7522.Pin24 LB strobe (latch low byte)",
-             4: "AC4 AD7522.Pin25 HB strobe (latch high byte)",
-             5: "AC4 AD7522.Pin21 LDAC (load DAC)",
+             4: "AC4 AD7522.Pin25 HBS strobe (latch high byte — wiki verified 2026-06-07)",
+             5: "AC4 AD7522.Pin22 LDAC (load DAC — wiki verified 2026-06-07; Pin 21 is SPC, NOT LDAC)",
              6: "any CS line (e.g. AD4 IC1.Pin15 /Y0)",
              7: "any 10 dB step CS (e.g. AD2 IC2 7406 output)",
          },
@@ -350,6 +383,15 @@ LS138_ISOLATION = TestDef(
         {"type": "prompt", "id": "intro", "text": (
             "=== 74LS138 ISOLATION TEST ===\n"
             "Hypothesis: AD4 IC1 (74LS138) is sinking current on its Pin 3 ('C' address line).\n\n"
+            "ORIENTATION / SETUP:\n"
+            "  - This is a CROSS-BOARD test: AA2/1 (top) + AD4 (lower box).\n"
+            "    Unit must be INVERTED for the AD4 IC1 clips.\n"
+            "  - The LIFT-PIN-3 step requires a fine soldering tip on AD4 IC1\n"
+            "    with the board reachable from the underside. Easiest with the\n"
+            "    unit fully inverted and the RF deck out of the way.\n"
+            "  - AD4 IC1 is a 16-pin DIP — confirm the silkscreen designator\n"
+            "    before lifting (the user previously mistook AD2 for the\n"
+            "    keyboard board; see wiki fine-attenuator-non-linearity.md).\n\n"
             "Procedure:\n"
             "  1) Capture a DAC write with AD4 IC1 fully in circuit (CONTROL capture)\n"
             "  2) Power off, lift Pin 3 of AD4 IC1 with a fine tip\n"
@@ -368,8 +410,8 @@ LS138_ISOLATION = TestDef(
              1: "AA2/1 IC11.Pin16 ('B' line — control)",
              2: "AA2/1 IC11.Pin14 ('A' line — control)",
              3: "AC4 AD7522.Pin24 LB strobe",
-             4: "AC4 AD7522.Pin25 HB strobe",
-             5: "AC4 AD7522.Pin21 LDAC",
+             4: "AC4 AD7522.Pin25 HBS strobe (latch high byte — wiki verified 2026-06-07)",
+             5: "AC4 AD7522.Pin22 LDAC (load DAC — wiki verified 2026-06-07; Pin 21 is SPC, NOT LDAC)",
              6: "AD4 IC1.Pin15 /Y0 (74LS138 output A)",
              7: "AD4 IC1.Pin14 /Y1 (74LS138 output B)",
          },
@@ -721,8 +763,8 @@ LS273_SEQUENCE = TestDef(
              2: "AA2/1 IC10.Pin7   (data bus A2 = 74LS245 A-side bit 2)",
              3: "AA2/1 IC10.Pin10  (data bus A3 = 74LS245 A-side bit 3)",
              4: "AA2/1 IC10.Pin12  (data bus A4 = 74LS245 A-side bit 4)",
-             5: "AC4 AD7522.Pin24  (LB strobe — latches A0-A7 on the DAC)",
-             6: "AC4 AD7522.Pin21  (LDAC — loads the DAC from the latched byte)",
+             5: "AC4 AD7522.Pin24  (LBS strobe — latches DB0-DB7 on the DAC, wiki verified 2026-06-07)",
+             6: "AC4 AD7522.Pin22  (LDAC — loads the DAC from the latched byte; Pin 21 is SPC, NOT LDAC)",
              7: "GND (reference — clip to AA2/1 GND)",
          },
          "wait_for": "enter"},
@@ -801,17 +843,24 @@ DAC_DMM_CROSSCHECK = TestDef(
             "look clean, but analog output is wrong.\n\n"
             "Procedure:\n"
             "  1) DMM on AC4 TP2 (mV DC mode). DMM negative (COM) lead to AC4 TP_GND "
-            "(any AC4 GND test point is fine, or Pin 7 of any AC4 74LSxx IC).\n"
-            "  2) For each code {0, 1024, 2048, 4095} (12-bit):\n"
-            "     - Enter the code, press STORE\n"
-            "     - Wait ~100ms for settling\n"
+            "(any AC4 GND test point is fine — Pin 10 of any AC4 74LSxx, or Pin 8/7 "
+            "of the AD7522 itself: Pin 8 = AGND, Pin 28 = DGND).\n"
+            "  2) For each code {0, 256, 512, 1023} (10-bit, the full DAC range):\n"
+            "     - Enter the code via Second Function 3 (A7L2 = low byte, A7L3 = high byte)\n"
+            "     - Press STORE, wait ~100ms for settling\n"
             "     - Read DMM\n"
             "  3) Harness compares each reading to the expected voltage (within 2%)\n\n"
-            "Expected output range (assuming 10V reference and R-2R ladder):\n"
-            "  - Code 0:    0.000 V\n"
-            "  - Code 1024: ~2.500 V (quarter scale)\n"
-            "  - Code 2048: ~5.000 V (half scale)\n"
-            "  - Code 4095: ~9.998 V (full scale)\n\n"
+            "Expected output range (assuming 10V reference and R-2R ladder, "
+            "Vout = code × 10/1024):\n"
+            "  - Code 0:    0.000 V (zero scale)\n"
+            "  - Code 256:  2.500 V (quarter scale)\n"
+            "  - Code 512:  5.000 V (half scale)\n"
+            "  - Code 1023: 9.990 V (full scale, all 10 bits set)\n\n"
+            "Encoding for Second Function 3 (A7L2 = low byte, A7L3 = high byte):\n"
+            "  Code   0 → A7L2=00000000, A7L3=00000000\n"
+            "  Code 256 → A7L2=00000000, A7L3=00000001  (DB8 set)\n"
+            "  Code 512 → A7L2=00000000, A7L3=00000010  (DB9 set)\n"
+            "  Code 1023 → A7L2=11111111, A7L3=00000011 (DB9,DB8,DB7..DB0 all set)\n\n"
             "Press ENTER to start."
         ), "wait_for": "enter"},
 
@@ -820,76 +869,78 @@ DAC_DMM_CROSSCHECK = TestDef(
              "channel": "AC4.TP2", "code": 0,
              "expected": 0.0, "tolerance_pct": 2.0, "unit": "V",
              "_default_value": 0.000,
-             "notes": "DAC code 0 — expect 0.000V"
+             "notes": "10-bit DAC code 0 — expect 0.000V (A7L2=0, A7L3=0)"
          },
          "prompt": "DMM reading for code 0:"},
 
-        {"type": "prompt", "id": "write_1024", "text": (
-            "WRITE CODE 1024 (quarter scale, binary 0000010000000000):\n"
-            "  - In Second Function 3, select A7L2 then A7L3\n"
-            "  - Low byte  = 00000000\n"
-            "  - High byte = 00000100\n"
-            "  - Press STORE\n"
-            "  - Wait 100ms\n"
-            "  - Read DMM (record below)"
+        {"type": "prompt", "id": "write_256", "text": (
+            "WRITE CODE 256 (quarter scale, only DB8 set):\n"
+            "  - In Second Function 3, write A7L2=00000000 first, then A7L3=00000001\n"
+            "  - Press STORE, wait 100ms, read DMM\n"
+            "  - (A7L2 first then A7L3 per the wiki's A7L2/A7L3 manual latch procedure)"
         ), "wait_for": "enter"},
 
-        {"type": "set_state", "id": "tp2_code_1024", "key": "tp2_code_1024",
+        {"type": "set_state", "id": "tp2_code_256", "key": "tp2_code_256",
          "measurement": {
-             "channel": "AC4.TP2", "code": 1024,
+             "channel": "AC4.TP2", "code": 256,
              "expected": 2.500, "tolerance_pct": 2.0, "unit": "V",
-             "_default_value": 0.620,
-             "notes": "DAC code 1024 — expect 2.500V"
+             "_default_value": 0.310,
+             "notes": "10-bit DAC code 256 (A7L2=0, A7L3=00000001) — expect 2.500V. "
+                      "Historical 2019A reading was ~0.310V (~1/4 of expected) when HB was failing."
          },
-         "prompt": "DMM reading for code 1024:"},
+         "prompt": "DMM reading for code 256:"},
 
-        {"type": "prompt", "id": "write_2048", "text": (
-            "WRITE CODE 2048 (half scale):\n"
-            "  - Low byte  = 00000000\n"
-            "  - High byte = 00001000\n"
+        {"type": "prompt", "id": "write_512", "text": (
+            "WRITE CODE 512 (half scale, only DB9 set):\n"
+            "  - In Second Function 3, write A7L2=00000000 first, then A7L3=00000010\n"
             "  - Press STORE, wait 100ms, read DMM"
         ), "wait_for": "enter"},
 
-        {"type": "set_state", "id": "tp2_code_2048", "key": "tp2_code_2048",
+        {"type": "set_state", "id": "tp2_code_512", "key": "tp2_code_512",
          "measurement": {
-             "channel": "AC4.TP2", "code": 2048,
+             "channel": "AC4.TP2", "code": 512,
              "expected": 5.000, "tolerance_pct": 2.0, "unit": "V",
-             "_default_value": 1.240,
-             "notes": "DAC code 2048 — expect 5.000V"
+             "_default_value": 0.620,
+             "notes": "10-bit DAC code 512 (A7L2=0, A7L3=00000010) — expect 5.000V. "
+                      "Historical 2019A reading was ~0.620V (~1/8 of expected) when HB was failing."
          },
-         "prompt": "DMM reading for code 2048:"},
+         "prompt": "DMM reading for code 512:"},
 
-        {"type": "prompt", "id": "write_4095", "text": (
-            "WRITE CODE 4095 (full scale):\n"
-            "  - Low byte  = 11111111\n"
-            "  - High byte = 00001111\n"
+        {"type": "prompt", "id": "write_1023", "text": (
+            "WRITE CODE 1023 (full scale, all 10 bits set):\n"
+            "  - In Second Function 3, write A7L2=11111111 first, then A7L3=00000011\n"
             "  - Press STORE, wait 100ms, read DMM"
         ), "wait_for": "enter"},
 
-        {"type": "set_state", "id": "tp2_code_4095", "key": "tp2_code_4095",
+        {"type": "set_state", "id": "tp2_code_1023", "key": "tp2_code_1023",
          "measurement": {
-             "channel": "AC4.TP2", "code": 4095,
-             "expected": 9.998, "tolerance_pct": 2.0, "unit": "V",
-             "_default_value": 2.480,
-             "notes": "DAC code 4095 — expect 9.998V"
+             "channel": "AC4.TP2", "code": 1023,
+             "expected": 9.990, "tolerance_pct": 2.0, "unit": "V",
+             "_default_value": 1.240,
+             "notes": "10-bit DAC code 1023 (A7L2=255, A7L3=00000011) — expect 9.990V. "
+                      "Historical 2019A reading was ~1.240V (~1/8 of expected) when HB was failing."
          },
-         "prompt": "DMM reading for code 4095:"},
+         "prompt": "DMM reading for code 1023:"},
 
         {"type": "analyse", "id": "ana_dac", "kind": "analogue_vs_code",
          "params": {
              "measurements_key": "tp2",
-             # Map: code -> expected_v. The harness reads back the values from sticky_state.
+             # Map: 10-bit code -> expected_v. Vout = code × 10V / 1024.
              "expected_table": {
-                 0:    0.0,
-                 1024: 2.500,
-                 2048: 5.000,
-                 4095: 9.998,
+                 0:    0.000,
+                 256:  2.500,
+                 512:  5.000,
+                 1023: 9.990,
              },
              "tolerance_pct": 2.0,
          }},
 
         {"type": "note", "id": "verdict_note",
-         "prompt": "Verdict — is the AD7522LN DAC faulty? (yes / no / inconclusive):",
+         "prompt": ("Verdict — is the AD7522LN DAC faulty? (yes / no / inconclusive)\n"
+                    "Note: if code 256 reads ~0.310V (1/8 of expected), that means "
+                    "DB8 is being latched but not DB9 — the HB strobe is dropping "
+                    "one bit. If code 512 reads the same as code 256, both HB bits "
+                    "are stuck or HBS is dead."),
          "multiline": True},
     ],
 )
@@ -911,8 +962,8 @@ DAC_DMM_CROSSCHECK = TestDef(
 #   CH3  IC21.Q  A0 latched (buffer: demuxed address)
 #   CH4  IC11.18 'C' addr  (buffer: address line, the shark-fin target)
 #   CH5  AC3/ACL3 IC1.Y1  A7L1 (decoder: 74LS138 output for the target latch)
-#   CH6  AC4 IC6.24 LB     (DAC: low-byte strobe)
-#   CH7  AC4 IC6.21 LDAC   (DAC: load-DAC strobe)
+#   CH6  AC4 IC6.24 LBS    (DAC: low-byte strobe — wiki verified 2026-06-07)
+#   CH7  AC4 IC6.22 LDAC   (DAC: load-DAC strobe — Pin 21 is SPC, NOT LDAC)
 #
 # Note: in simulate mode, the synthetic VCD emulates a clean path with
 # a default fault tag, or the operator can set --simulate-pattern
@@ -928,8 +979,8 @@ E2E_PROBE_MAP: dict = {
     3: "AA2/1 IC21.Q     A0   (latched lower address from demuxer)",
     4: "AA2/1 IC11.Pin18 'C'  (address line — the bus contention target)",
     5: "AC3/ACL3 IC1.Pin15 /Y1  A7L1  (74LS138 Y-output for the target latch)",
-    6: "AC4 IC6.Pin24  LB   (AD7522 low-byte strobe)",
-    7: "AC4 IC6.Pin21  LDAC (AD7522 load-DAC strobe)",
+    6: "AC4 IC6.Pin24  LBS  (AD7522 low-byte strobe — wiki verified 2026-06-07)",
+    7: "AC4 IC6.Pin22  LDAC (AD7522 load-DAC strobe — Pin 21 is SPC, NOT LDAC)",
 }
 
 
@@ -959,7 +1010,7 @@ BUS_E2E_CPU_TO_AC4 = TestDef(
             "    IC1.Y? A7L? (the Y-output for the target latch)\n"
             "\n"
             "  Stage 4 — DAC (AC4 IC6 AD7522):\n"
-            "    IC6.24 LB | IC6.21 LDAC\n"
+            "    IC6.24 LBS | IC6.22 LDAC\n"
             "\n"
             "Each capture is 1 second at 24 MHz, triggered on the /WR strobe.\n"
             "Same 8-channel probe map is used for all 4 stages — clip once,\n"
@@ -969,8 +1020,20 @@ BUS_E2E_CPU_TO_AC4 = TestDef(
             "stage that fails tells you where in the pipeline the bus\n"
             "transaction is going wrong.\n"
             "\n"
+            "ORIENTATION / SETUP:\n"
+            "  - This is the FLAGSHIP CROSS-BOARD test: probes on AA2/1 (top)\n"
+            "    + AC3/ACL3 + AC4 (lower box). The 8 clips must span the full\n"
+            "    bus length. Unit must be INVERTED.\n"
+            "  - The 'clip once' design only works if the 8 LA leads are long\n"
+            "    enough to reach from the LA (sitting on the bench next to\n"
+            "    the inverted unit) to AA2/1 (top of inverted stack) and the\n"
+            "    lower board clips on the lower box. Verify clip lead length\n"
+            "    (~12\" typical for the Saleae 8ch; longer if needed).\n"
+            "  - The DMM on AC4 TP2 must remain connected for the analog\n"
+            "    cross-check at the end. Long DMM leads are fine for mV-DC.\n"
+            "\n"
             "PRE-REQUISITES:\n"
-            "  - 2019A powered OFF, lid off, ESD strap on\n"
+            "  - 2019A powered OFF, lid off, ESD strap on, unit INVERTED\n"
             "  - Logic analyser plugged in, driver loaded (fx2lafw)\n"
             "  - DMM on AC4 TP2 (mV DC mode)\n"
             "  - Service manual open to page-014 (Fig. 3) and page-097 (Table 24)\n"
@@ -1797,35 +1860,48 @@ LEVEL_SWEEP_DAC = TestDef(
     name="level_sweep_dac",
     description=(
         "Per-IC protocol decode for the AD7522LN DAC during a +7 dBm → "
-        "-5 dBm level sweep. Probes LB, HB, LDAC, and 5 data bits "
-        "(DB3..DB7). The protocol_decode analyser samples the 5-bit data "
-        "bus on each LB rising edge, decodes the low-byte value being "
-        "requested, and reports whether each level change carried the "
-        "expected code. Use this on AC4 IC6."
+        "-5 dBm level sweep. Probes LBS, HBS, LDAC, and 5 data bits "
+        "(DB0..DB4 — the LSBs of the low byte). The protocol_decode "
+        "analyser samples the 5-bit data bus on each LBS rising edge and "
+        "reports the low-byte value being requested. **This probe map is "
+        "tuned for 1 dB steps that move the BOTTOM of the byte** — if "
+        "TP2 is known to move on each step (per `fine-attenuator-non-"
+        "linearity.md`), the level-change data lives in DB0..DB4, not "
+        "DB3..DB7. For the full 10-bit decode, use Second Function 3 "
+        "(manual mode) per dac-bit-and-latch-verification.md. Use this on "
+        "AC4 IC6."
     ),
     steps=[
         {"type": "prompt", "id": "intro", "text": (
             "=== LEVEL SWEEP DAC — AD7522 protocol decode ===\n"
-            "Probe LB, HB, LDAC, and 5 of 8 low-byte data bits. At each\n"
-            "level change, the CPU issues an LB strobe with new data —\n"
+            "Probe LBS, HBS, LDAC, and 5 of 8 low-byte data bits. At each\n"
+            "level change, the CPU issues an LBS strobe with new data —\n"
             "the analyser samples the 5-bit slice and reports the value.\n\n"
             "PROBE MAP (per the user-verified AD7522 pinout, manual\n"
             "transcription from the Analog Devices datasheet, 2026-06-07):\n"
             "  LA CH1 (D0) → AD7522.Pin24  LBS  (event trigger)\n"
             "  LA CH2 (D1) → AD7522.Pin25  HBS  (qualifier — must follow LBS)\n"
             "  LA CH3 (D2) → AD7522.Pin22  LDAC (qualifier — must follow HBS)\n"
-            "  LA CH4 (D3) → AD7522.Pin13  DB6  (data bit 6)\n"
-            "  LA CH5 (D4) → AD7522.Pin14  DB5  (data bit 5)\n"
-            "  LA CH6 (D5) → AD7522.Pin15  DB4  (data bit 4)\n"
-            "  LA CH7 (D6) → AD7522.Pin16  DB3  (data bit 3 — LSB of slice)\n"
-            "  LA CH8 (D7) → AD7522.Pin12  DB7  (data bit 7 — MSB of low byte)\n\n"
-            "NOTE: the DB3..DB7 pins are physically contiguous on the\n"
-            "AD7522 (pins 12, 13, 14, 15, 16 — NOT in numeric order on the\n"
-            "chip, but adjacent). Pin 12 is DB7 (MSB of the low byte),\n"
-            "pin 16 is DB3 (LSB of the probed slice). For the full 10-bit\n"
-            "decode, use Second Function 3 (manual mode) per\n"
-            "dac-bit-and-latch-verification.md. This test tells you the\n"
-            "bus is requesting values at the right moments.\n\n"
+            "  LA CH4 (D3) → AD7522.Pin19  DB0  (LSB of low byte)\n"
+            "  LA CH5 (D4) → AD7522.Pin18  DB1\n"
+            "  LA CH6 (D5) → AD7522.Pin17  DB2\n"
+            "  LA CH7 (D6) → AD7522.Pin16  DB3\n"
+            "  LA CH8 (D7) → AD7522.Pin15  DB4  (MSB of probed slice)\n\n"
+            "NOTE: the DB0..DB4 pins are physically spread across the\n"
+            "AD7522 (pins 15, 16, 17, 18, 19 — ADJACENT on the chip in\n"
+            "ascending-pin order, but with HBS at Pin 25 in between for\n"
+            "the MSB side). Pin 19 is DB0 (LSB of low byte), pin 15 is\n"
+            "DB4 (MSB of the probed slice). For the full 10-bit decode,\n"
+            "use Second Function 3 (manual mode) per\n"
+            "dac-bit-and-latch-verification.md. This test tells you\n"
+            "the bus is requesting values at the right moments and that\n"
+            "the LSBs of the low byte are actually changing.\n\n"
+            "WHY DB0..DB4 (not DB3..DB7): TP2 is known to move on every\n"
+            "1 dB step. The LSBs of the 10-bit DAC code carry that\n"
+            "step-to-step variation. Probing the MSB side of the byte\n"
+            "(DB3..DB7) only sees the carry-ripple transitions and gives\n"
+            "a flat-looking decode (all values look the same). Probing\n"
+            "the LSB side (DB0..DB4) actually captures the step change.\n\n"
             "PROTOCOL:\n"
             "  1) Clip LA channels to AC4 IC6 per the probe map above.\n"
             "  2) GND clip on AC4 DGND (Pin 28 per datasheet) or AGND\n"
@@ -1847,11 +1923,11 @@ LEVEL_SWEEP_DAC = TestDef(
              0: "AD7522.Pin24  LBS  (low byte strobe — event trigger)",
              1: "AD7522.Pin25  HBS  (high byte strobe)",
              2: "AD7522.Pin22  LDAC (transfer to DAC register)",
-             3: "AD7522.Pin13  DB6",
-             4: "AD7522.Pin14  DB5",
-             5: "AD7522.Pin15  DB4",
-             6: "AD7522.Pin16  DB3  (LSB of probed slice)",
-             7: "AD7522.Pin12  DB7  (MSB of low byte)",
+             3: "AD7522.Pin19  DB0  (LSB of low byte)",
+             4: "AD7522.Pin18  DB1",
+             5: "AD7522.Pin17  DB2",
+             6: "AD7522.Pin16  DB3",
+             7: "AD7522.Pin15  DB4  (MSB of probed slice)",
          },
          "wait_for": "enter"},
 
@@ -1867,17 +1943,16 @@ LEVEL_SWEEP_DAC = TestDef(
          "params": {}},
 
         # protocol_decode: rising LBS edges are the events. 5-bit data
-        # bus on LA CH3..CH7 = DB6/DB5/DB4/DB3 (CH3=Pin13=DB6=bit6,
-        # CH4=Pin14=DB5=bit5, CH5=Pin15=DB4=bit4, CH6=Pin16=DB3=bit3)
-        # and CH7=Pin12=DB7=bit7. The user-verified AD7522 pinout has
-        # pin 12 = DB7 and pin 16 = DB3, so the 5-bit slice across
-        # LA CH3..CH7 is bits 7,6,5,4,3 (in physical CH order) but the
-        # bit positions in the decoded value are 6,5,4,3,7.
+        # bus on LA CH3..CH7 = DB0/DB1/DB2/DB3/DB4 (CH3=Pin19=DB0=bit0,
+        # CH4=Pin18=DB1=bit1, CH5=Pin17=DB2=bit2, CH6=Pin16=DB3=bit3,
+        # CH7=Pin15=DB4=bit4). The user-verified AD7522 pinout has
+        # pin 19 = DB0 and pin 15 = DB4, so the 5-bit slice across
+        # LA CH3..CH7 is bits 0,1,2,3,4 in physical CH order.
         {"type": "analyse", "id": "ana_decode", "kind": "protocol_decode",
          "params": {
              "mode": "clock_edge",
              "clock_channel": 0,
-             "data_channels": {6: 3, 5: 4, 4: 5, 3: 6, 7: 7},
+             "data_channels": {0: 3, 1: 4, 2: 5, 3: 6, 4: 7},
              "sample_point": "after",
              "sample_offset_ns": 100,
              "signed": False,
@@ -1886,7 +1961,7 @@ LEVEL_SWEEP_DAC = TestDef(
         {"type": "note", "id": "obs", "prompt": (
             "INTERPRET:\n"
             "  - n_events = number of LBS rising edges in 15 s. Expected: ~12.\n"
-            "  - Each event's 'hex' is the 5-bit data slice (DB7..DB3) being\n"
+            "  - Each event's 'hex' is the 5-bit data slice (DB4..DB0) being\n"
             "    written. The full 10-bit DAC code is HBS_byte*256 + LBS_byte,\n"
             "    but the LBS values should change with each 1 dBm step.\n"
             "  - bus_census: CH1 (LBS), CH2 (HBS), CH3 (LDAC) should each\n"
@@ -1900,9 +1975,15 @@ LEVEL_SWEEP_DAC = TestDef(
             "  - signal_integrity on CH1 (LBS): 'suspect' means sub-100ns\n"
             "    oscillation = bus contention on the LBS line. The original\n"
             "    shark-fin fault mode.\n"
-            "  - signal_integrity on CH2 (HBS): same diagnostic. Your scope\n"
+            "  - signal integrity on CH2 (HBS): same diagnostic. Your scope\n"
             "    showed a 'thin spike followed by proper TTL pulse' on HBS —\n"
             "    the LA should see the same spike as multiple rapid edges.\n"
+            "  - The 5 decoded values across 12 sweeps should show MONOTONIC\n"
+            "    CHANGE in DB0..DB4 (TP2 is known to move each step). If all\n"
+            "    12 events decode to the same 5-bit value, then either:\n"
+            "      (a) the LSBs of the byte are stuck, or\n"
+            "      (b) the sweep didn't actually move TP2 (re-confirm the\n"
+            "          DMM reading on TP2 changed).\n"
             "  - WARNING: if you accidentally clipped the LA's CLK pin, all\n"
             "    channels will show inflated edge counts from 48 MHz coupling.\n\n"
             "Free-text observation:"
