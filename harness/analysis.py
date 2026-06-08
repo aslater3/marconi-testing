@@ -86,7 +86,11 @@ def analyse_n_way_diff(captures: dict[str, Capture], params: dict) -> dict:
         levels_changed = len(set(final_states)) > 1
 
         # Check expected levels (if provided)
-        exp = expect_levels.get(str(ch)) or expect_levels.get(ch)
+        # Use explicit None check rather than `or` so a legitimate expected
+        # value of 0 or [] is not silently dropped.
+        exp = expect_levels.get(str(ch))
+        if exp is None:
+            exp = expect_levels.get(ch)
         level_match = None
         if exp is not None:
             if len(exp) != len(final_states):
@@ -132,7 +136,9 @@ def analyse_n_way_diff(captures: dict[str, Capture], params: dict) -> dict:
             wrong.append(ch)
         elif info["health"] == "stuck":
             # Check if it was expected to change
-            exp = expect_levels.get(str(ch)) or expect_levels.get(ch)
+            exp = expect_levels.get(str(ch))
+            if exp is None:
+                exp = expect_levels.get(ch)
             if exp is not None and len(set(exp)) > 1:
                 # Expected to change but didn't — truly stuck
                 truly_stuck.append(ch)
@@ -249,8 +255,8 @@ E2E_CHANNELS: dict[str, int] = {
     "a0":       3,  # IC21.Q  A0 latched
     "addr_c":   4,  # IC11.18 'C' address line
     "a7l_y":    5,  # AC3/ACL3 IC1.Y?  A7L? (the Y-output we're targeting)
-    "lb":       6,  # AC4 IC6.24 LB strobe
-    "ldac":     7,  # AC4 IC6.21 LDAC
+    "lb":       6,  # AC4 IC6.24  LBS  (Low Byte Strobe — wiki verified 2026-06-07)
+    "ldac":     7,  # AC4 IC6.22  LDAC (Load DAC — wiki verified 2026-06-07; IC6.21 is SPC, NOT LDAC)
 }
 
 # Stage definitions: each stage knows which channel(s) to check, what the
@@ -294,8 +300,8 @@ E2E_STAGES: list[dict] = [
         "channel_keys": ["lb", "ldac"],
         "min_edges": {"lb": 1, "ldac": 1},
         "checks": [
-            ("lb",      "AD7522 LB strobe pulsed (Pin 24)"),
-            ("ldac",    "AD7522 LDAC strobe fired after LB settled (Pin 21)"),
+            ("lb",      "AD7522 LBS strobe pulsed (Pin 24)"),
+            ("ldac",    "AD7522 LDAC strobe fired after LBS settled (Pin 22; Pin 21 is SPC, NOT LDAC)"),
         ],
     },
 ]
@@ -1119,6 +1125,18 @@ def analyse_protocol_decode(captures: dict, params: dict) -> dict:
     level_markers = params.get("level_markers", [])  # list of t_ns, sorted
     expected = params.get("expected", [])           # list of ints, per level
 
+    # JSON round-tripping turns int dict keys into str ("0" not 0). The
+    # bit-shift math below does 1 << bit_pos and will TypeError on a
+    # string. Coerce keys to int here so stored reports survive reload.
+    if data_chs:
+        data_chs = {int(k): int(v) for k, v in data_chs.items()}
+    if invert:
+        invert = {int(k): bool(v) for k, v in invert.items()}
+    if clock_ch is not None:
+        clock_ch = int(clock_ch)
+    if enable_ch is not None:
+        enable_ch = int(enable_ch)
+
     out["mode"] = mode
     out["clock_channel"] = clock_ch
     out["data_channels"] = data_chs
@@ -1184,8 +1202,29 @@ def analyse_protocol_decode(captures: dict, params: dict) -> dict:
     #     2019A where the data bus is shared with other address-decoded
     #     writes and doesn't settle until after the strobe rises.
     #   "stable" — sample at the midpoint of the strobe high window.
+    #
+    # IMPORTANT: for any "clocked-latch" protocol (e.g. AD7522 LBS, 74LS273
+    # CLK), the data MUST be sampled BEFORE the rising edge. The latch
+    # captures on the rising edge, and the CPU typically releases the
+    # data bus 50-100 ns after the strobe rises, which means an "after"
+    # sample lands on the bus idle state (pull-ups to logic 1) and
+    # reports every byte as 0xFF. If you see "all 0xFF" decoded values
+    # on every event, the sample_point is wrong.
     sample_point = params.get("sample_point", "before")  # before/after/stable
     sample_offset_ns = int(params.get("sample_offset_ns", 1))
+    if sample_point == "after" and sample_offset_ns >= 20 and "sample_point" in params:
+        # Heuristic guard: warn the operator that "after 20+ ns" on a
+        # typical CPU bus is almost always wrong. This catches the
+        # classic "I read 0xFF on every strobe" bug without forcing a
+        # hard error.
+        out.setdefault("_warnings", []).append(
+            f"sample_point='after' with sample_offset_ns={sample_offset_ns} — "
+            "for a clocked latch (AD7522 LBS, 74LS273 CLK), the data is "
+            "latched on the rising edge and the CPU releases the bus shortly "
+            "after. Sampling >20 ns after the edge often lands on the bus "
+            "idle state (all 1s) and reports 0xFF for every event. "
+            "Consider sample_point='before' with sample_offset_ns=50."
+        )
     for idx, (t, _src) in enumerate(events):
         if sample_point == "before":
             sample_t = max(0, t - sample_offset_ns)

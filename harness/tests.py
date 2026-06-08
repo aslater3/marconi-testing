@@ -1948,13 +1948,21 @@ LEVEL_SWEEP_DAC = TestDef(
         # CH7=Pin15=DB4=bit4). The user-verified AD7522 pinout has
         # pin 19 = DB0 and pin 15 = DB4, so the 5-bit slice across
         # LA CH3..CH7 is bits 0,1,2,3,4 in physical CH order.
+        #
+        # Sample BEFORE the rising LBS edge: the AD7522 latches on the
+        # rising edge of LBS, so the data must be stable in the setup
+        # window BEFORE the edge. Sampling AFTER the edge (e.g. 100 ns
+        # later) lands after the CPU has released the bus and we'd just
+        # see the bus idle state (all 1s from pull-ups). 50 ns before
+        # the edge is well inside the 100 ns minimum LBS pulse width and
+        # the AD7522's 50 ns data setup time.
         {"type": "analyse", "id": "ana_decode", "kind": "protocol_decode",
          "params": {
              "mode": "clock_edge",
              "clock_channel": 0,
              "data_channels": {0: 3, 1: 4, 2: 5, 3: 6, 4: 7},
-             "sample_point": "after",
-             "sample_offset_ns": 100,
+             "sample_point": "before",
+             "sample_offset_ns": 50,
              "signed": False,
          }},
 
