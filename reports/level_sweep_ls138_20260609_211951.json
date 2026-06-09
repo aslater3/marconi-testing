@@ -1,0 +1,968 @@
+{
+  "schema_version": 1,
+  "test": "level_sweep_ls138",
+  "test_description": "Per-IC protocol decode for a 74LS138 (3-to-8 decoder) during a +7 dBm \u2192 -5 dBm level sweep. All 8 /Y outputs probed. The protocol_decode analyser reports which /Y fired and when, so a stuck or missing /Y output is visible. Use this for AD4 IC1 (the prime suspect), AA2/1 IC13, AA2/1 IC17, or any AC13 '138.",
+  "operator": "andy",
+  "hostname": "andys-MacBook-Pro.local",
+  "started_at": "2026-06-09T20:16:55+00:00",
+  "finished_at": "2026-06-09T20:19:51+00:00",
+  "hardware": "fx2lafw 24MHz 8ch",
+  "captures": {
+    "cap_ls138_sweep": {
+      "name": "cap_ls138_sweep",
+      "sample_rate_hz": 24000000,
+      "n_samples": 360000000,
+      "duration_s": 15.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": null,
+      "raw_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_ls138_sweep_20260609_211659.raw",
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_ls138_sweep_20260609_211659.vcd.gz",
+      "captured_at": "20260609_211659",
+      "mode": "hardware",
+      "notes": "captured via sigrok-cli fx2lafw (Saleae Logic 8ch/24MHz)"
+    }
+  },
+  "events": [
+    {
+      "t": "2026-06-09T20:16:59+00:00",
+      "step_id": "clip_ls138",
+      "type": "clip",
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "probes": {
+        "0": "74LS138.Pin15  /Y0",
+        "1": "74LS138.Pin14  /Y1",
+        "2": "74LS138.Pin13  /Y2",
+        "3": "74LS138.Pin12  /Y3",
+        "4": "74LS138.Pin11  /Y4",
+        "5": "74LS138.Pin10  /Y5",
+        "6": "74LS138.Pin9   /Y6",
+        "7": "74LS138.Pin7   /Y7"
+      },
+      "text": "Clip the channels:"
+    },
+    {
+      "t": "2026-06-09T20:17:14+00:00",
+      "step_id": "cap_ls138_sweep",
+      "type": "capture",
+      "capture_id": "cap_ls138_sweep",
+      "mode": "hardware",
+      "duration_s": 15.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 360000000,
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_ls138_sweep_20260609_211659.vcd.gz"
+    },
+    {
+      "t": "2026-06-09T20:17:14+00:00",
+      "step_id": "ana_census",
+      "type": "analysis",
+      "kind": "bus_census",
+      "params": {
+        "reference": "self"
+      },
+      "result": {
+        "kind": "bus_census",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 3,
+            "n_rising": 2,
+            "n_falling": 1,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 1,
+            "n_rising": 1,
+            "n_falling": 0,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 61,
+            "n_rising": 31,
+            "n_falling": 30,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 61,
+            "n_rising": 31,
+            "n_falling": 30,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 1,
+            "n_rising": 1,
+            "n_falling": 0,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 1,
+            "n_rising": 1,
+            "n_falling": 0,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 1,
+            "n_rising": 1,
+            "n_falling": 0,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 1,
+            "n_rising": 1,
+            "n_falling": 0,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          }
+        }
+      }
+    },
+    {
+      "t": "2026-06-09T20:17:14+00:00",
+      "step_id": "ana_si",
+      "type": "analysis",
+      "kind": "signal_integrity",
+      "params": {},
+      "result": {
+        "kind": "signal_integrity",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 3,
+            "n_intervals": 2,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": 142666,
+            "median_gap_ns": 1517910167,
+            "max_gap_ns": 1517910167,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 1,
+            "n_intervals": 0,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": null,
+            "median_gap_ns": null,
+            "max_gap_ns": null,
+            "health": "ok",
+            "notes": "fewer than 2 edges \u2014 no intervals to analyse"
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 61,
+            "n_intervals": 60,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": 142625,
+            "median_gap_ns": 75185000,
+            "max_gap_ns": 904888667,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 61,
+            "n_intervals": 60,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": 142625,
+            "median_gap_ns": 75198042,
+            "max_gap_ns": 904888708,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 1,
+            "n_intervals": 0,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": null,
+            "median_gap_ns": null,
+            "max_gap_ns": null,
+            "health": "ok",
+            "notes": "fewer than 2 edges \u2014 no intervals to analyse"
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 1,
+            "n_intervals": 0,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": null,
+            "median_gap_ns": null,
+            "max_gap_ns": null,
+            "health": "ok",
+            "notes": "fewer than 2 edges \u2014 no intervals to analyse"
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 1,
+            "n_intervals": 0,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": null,
+            "median_gap_ns": null,
+            "max_gap_ns": null,
+            "health": "ok",
+            "notes": "fewer than 2 edges \u2014 no intervals to analyse"
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 1,
+            "n_intervals": 0,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": null,
+            "median_gap_ns": null,
+            "max_gap_ns": null,
+            "health": "ok",
+            "notes": "fewer than 2 edges \u2014 no intervals to analyse"
+          }
+        },
+        "summary": {
+          "verdict": "OK \u2014 all 8 channel(s) clean",
+          "n_channels": 8,
+          "n_ok": 8,
+          "n_degraded": 0,
+          "n_suspect": 0,
+          "pct_sub100ns_overall": 0.0
+        }
+      }
+    },
+    {
+      "t": "2026-06-09T20:17:14+00:00",
+      "step_id": "ana_decode",
+      "type": "analysis",
+      "kind": "protocol_decode",
+      "params": {
+        "mode": "any_edge",
+        "data_channels": {
+          "0": 0,
+          "1": 1,
+          "2": 2,
+          "3": 3,
+          "4": 4,
+          "5": 5,
+          "6": 6,
+          "7": 7
+        },
+        "invert": {
+          "0": true,
+          "1": true,
+          "2": true,
+          "3": true,
+          "4": true,
+          "5": true,
+          "6": true,
+          "7": true
+        },
+        "signed": false
+      },
+      "result": {
+        "kind": "protocol_decode",
+        "events": [
+          {
+            "idx": 0,
+            "t_ns": 0,
+            "value": 0,
+            "binary": "00000000",
+            "hex": "0x00",
+            "decimal": 0,
+            "signed": 0
+          },
+          {
+            "idx": 1,
+            "t_ns": 0,
+            "value": 0,
+            "binary": "00000000",
+            "hex": "0x00",
+            "decimal": 0,
+            "signed": 0
+          },
+          {
+            "idx": 2,
+            "t_ns": 0,
+            "value": 0,
+            "binary": "00000000",
+            "hex": "0x00",
+            "decimal": 0,
+            "signed": 0
+          },
+          {
+            "idx": 3,
+            "t_ns": 0,
+            "value": 0,
+            "binary": "00000000",
+            "hex": "0x00",
+            "decimal": 0,
+            "signed": 0
+          },
+          {
+            "idx": 4,
+            "t_ns": 0,
+            "value": 0,
+            "binary": "00000000",
+            "hex": "0x00",
+            "decimal": 0,
+            "signed": 0
+          },
+          {
+            "idx": 5,
+            "t_ns": 0,
+            "value": 0,
+            "binary": "00000000",
+            "hex": "0x00",
+            "decimal": 0,
+            "signed": 0
+          },
+          {
+            "idx": 6,
+            "t_ns": 0,
+            "value": 0,
+            "binary": "00000000",
+            "hex": "0x00",
+            "decimal": 0,
+            "signed": 0
+          },
+          {
+            "idx": 7,
+            "t_ns": 0,
+            "value": 0,
+            "binary": "00000000",
+            "hex": "0x00",
+            "decimal": 0,
+            "signed": 0
+          },
+          {
+            "idx": 8,
+            "t_ns": 524618667,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 9,
+            "t_ns": 525350042,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 10,
+            "t_ns": 996063792,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 11,
+            "t_ns": 996795167,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 12,
+            "t_ns": 1518052833,
+            "value": 1,
+            "binary": "00000001",
+            "hex": "0x01",
+            "decimal": 1,
+            "signed": 1
+          },
+          {
+            "idx": 13,
+            "t_ns": 1519048417,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 14,
+            "t_ns": 1519779792,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 15,
+            "t_ns": 2013501208,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 16,
+            "t_ns": 2014232625,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 17,
+            "t_ns": 2514370250,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 18,
+            "t_ns": 2515101625,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 19,
+            "t_ns": 3041421708,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 20,
+            "t_ns": 3042153083,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 21,
+            "t_ns": 3604512083,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 22,
+            "t_ns": 3605243458,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 23,
+            "t_ns": 4110931208,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 24,
+            "t_ns": 4111662625,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 25,
+            "t_ns": 4615134417,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 26,
+            "t_ns": 4615865792,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 27,
+            "t_ns": 5083179000,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 28,
+            "t_ns": 5083910375,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 29,
+            "t_ns": 5549633583,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 30,
+            "t_ns": 5550364958,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 31,
+            "t_ns": 6037699458,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 32,
+            "t_ns": 6038430875,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 33,
+            "t_ns": 6517495333,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 34,
+            "t_ns": 6518102750,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 35,
+            "t_ns": 6592822958,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 36,
+            "t_ns": 6593443417,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 37,
+            "t_ns": 7160150375,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 38,
+            "t_ns": 7160881750,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 39,
+            "t_ns": 7831350250,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 40,
+            "t_ns": 7832081625,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 41,
+            "t_ns": 8736381583,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 42,
+            "t_ns": 8737112958,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 43,
+            "t_ns": 9215207250,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 44,
+            "t_ns": 9215938625,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 45,
+            "t_ns": 9636095750,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 46,
+            "t_ns": 9636827125,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 47,
+            "t_ns": 10076593333,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 48,
+            "t_ns": 10077324708,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 49,
+            "t_ns": 10495923417,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 50,
+            "t_ns": 10496530833,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 51,
+            "t_ns": 10571251083,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 52,
+            "t_ns": 10571871500,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 53,
+            "t_ns": 10941566042,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 54,
+            "t_ns": 10942297417,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 55,
+            "t_ns": 11363740958,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 56,
+            "t_ns": 11364472333,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 57,
+            "t_ns": 11767407125,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 58,
+            "t_ns": 11768138500,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 59,
+            "t_ns": 12137515833,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 60,
+            "t_ns": 12138247208,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 61,
+            "t_ns": 12575149042,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 62,
+            "t_ns": 12575880417,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 63,
+            "t_ns": 13071255250,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 64,
+            "t_ns": 13071986625,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 65,
+            "t_ns": 13865812083,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 66,
+            "t_ns": 13866543500,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          },
+          {
+            "idx": 67,
+            "t_ns": 14704767000,
+            "value": 4,
+            "binary": "00000100",
+            "hex": "0x04",
+            "decimal": 4,
+            "signed": 4
+          },
+          {
+            "idx": 68,
+            "t_ns": 14705498417,
+            "value": 8,
+            "binary": "00001000",
+            "hex": "0x08",
+            "decimal": 8,
+            "signed": 8
+          }
+        ],
+        "mode": "any_edge",
+        "clock_channel": null,
+        "data_channels": {
+          "0": 0,
+          "1": 1,
+          "2": 2,
+          "3": 3,
+          "4": 4,
+          "5": 5,
+          "6": 6,
+          "7": 7
+        },
+        "enable_channel": null,
+        "n_events": 69,
+        "summary": {
+          "n_unique_values": 4,
+          "min": 0,
+          "max": 8,
+          "monotonic": false,
+          "duplicate_count": 65
+        }
+      }
+    },
+    {
+      "t": "2026-06-09T20:19:51+00:00",
+      "step_id": "obs",
+      "type": "note",
+      "operator_input": "7dbm -> -5bm and back up to 6dbm roughly, fault with output fixed. IC3 on AD2 was not soldered correctly. Now seeing 3.8Vpp without 50R terminator at 7dbm, 1.320vpp with 50R terminator on scope"
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {}
+}
