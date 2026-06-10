@@ -1,0 +1,366 @@
+{
+  "schema_version": 1,
+  "test": "level_sweep_ls273",
+  "test_description": "Per-IC protocol decode for a 74LS273 (octal D-latch) during a +7 dBm \u2192 -5 dBm level sweep. Probes CLK, /CLR, and 6 of 8 Q outputs. The protocol_decode analyser samples Q0..Q5 just before each rising CLK edge, decodes the 6-bit value, and reports whether each level change actually latched new data. Use this for AA2/1 IC20, AD2 IC1 (the A6L10 heat-stressed latch), AD4 IC2/IC3/IC4, or any other 273 in the system.",
+  "operator": "andy",
+  "hostname": "andys-MacBook-Pro.local",
+  "started_at": "2026-06-10T11:55:53+00:00",
+  "finished_at": "2026-06-10T11:57:04+00:00",
+  "hardware": "fx2lafw 24MHz 8ch",
+  "captures": {
+    "cap_ls273_sweep": {
+      "name": "cap_ls273_sweep",
+      "sample_rate_hz": 24000000,
+      "n_samples": 360000000,
+      "duration_s": 15.0,
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "trigger": {
+        "channel": 0,
+        "edge": "rising"
+      },
+      "raw_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_ls273_sweep_20260610_125556.raw",
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_ls273_sweep_20260610_125556.vcd.gz",
+      "captured_at": "20260610_125556",
+      "mode": "hardware",
+      "notes": "captured via sigrok-cli fx2lafw (Saleae Logic 8ch/24MHz)"
+    }
+  },
+  "events": [
+    {
+      "t": "2026-06-10T11:55:56+00:00",
+      "step_id": "clip_ls273",
+      "type": "clip",
+      "channels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "probes": {
+        "0": "74LS273.Pin11  CLK",
+        "1": "74LS273.Pin1   /CLR (active-low, must be HIGH)",
+        "2": "74LS273.Pin19  Q0",
+        "3": "74LS273.Pin16  Q1",
+        "4": "74LS273.Pin15  Q2",
+        "5": "74LS273.Pin12  Q3",
+        "6": "74LS273.Pin9   Q4",
+        "7": "74LS273.Pin6   Q5"
+      },
+      "text": "Clip the channels:"
+    },
+    {
+      "t": "2026-06-10T11:56:11+00:00",
+      "step_id": "cap_ls273_sweep",
+      "type": "capture",
+      "capture_id": "cap_ls273_sweep",
+      "mode": "hardware",
+      "duration_s": 15.0,
+      "sample_rate_hz": 24000000,
+      "n_samples": 360000000,
+      "vcd_path": "/Users/andy/Documents/Marconi-Stuff/marconi-testing/captures/cap_ls273_sweep_20260610_125556.vcd.gz"
+    },
+    {
+      "t": "2026-06-10T11:56:11+00:00",
+      "step_id": "ana_census",
+      "type": "analysis",
+      "kind": "bus_census",
+      "params": {
+        "reference": "self"
+      },
+      "result": {
+        "kind": "bus_census",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 5,
+            "n_rising": 3,
+            "n_falling": 2,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 1,
+            "n_rising": 1,
+            "n_falling": 0,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 1,
+            "n_rising": 1,
+            "n_falling": 0,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 1,
+            "n_rising": 1,
+            "n_falling": 0,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 1,
+            "n_rising": 1,
+            "n_falling": 0,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 1,
+            "n_rising": 1,
+            "n_falling": 0,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 1,
+            "n_rising": 1,
+            "n_falling": 0,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 1,
+            "n_rising": 1,
+            "n_falling": 0,
+            "first_state": 1,
+            "last_state": 1,
+            "health": "ok",
+            "notes": ""
+          }
+        }
+      }
+    },
+    {
+      "t": "2026-06-10T11:56:11+00:00",
+      "step_id": "ana_si",
+      "type": "analysis",
+      "kind": "signal_integrity",
+      "params": {},
+      "result": {
+        "kind": "signal_integrity",
+        "channels": {
+          "ch0": {
+            "channel": 0,
+            "n_edges": 5,
+            "n_intervals": 4,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": 142250,
+            "median_gap_ns": 1767344708,
+            "max_gap_ns": 5763542375,
+            "health": "ok",
+            "notes": ""
+          },
+          "ch1": {
+            "channel": 1,
+            "n_edges": 1,
+            "n_intervals": 0,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": null,
+            "median_gap_ns": null,
+            "max_gap_ns": null,
+            "health": "ok",
+            "notes": "fewer than 2 edges \u2014 no intervals to analyse"
+          },
+          "ch2": {
+            "channel": 2,
+            "n_edges": 1,
+            "n_intervals": 0,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": null,
+            "median_gap_ns": null,
+            "max_gap_ns": null,
+            "health": "ok",
+            "notes": "fewer than 2 edges \u2014 no intervals to analyse"
+          },
+          "ch3": {
+            "channel": 3,
+            "n_edges": 1,
+            "n_intervals": 0,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": null,
+            "median_gap_ns": null,
+            "max_gap_ns": null,
+            "health": "ok",
+            "notes": "fewer than 2 edges \u2014 no intervals to analyse"
+          },
+          "ch4": {
+            "channel": 4,
+            "n_edges": 1,
+            "n_intervals": 0,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": null,
+            "median_gap_ns": null,
+            "max_gap_ns": null,
+            "health": "ok",
+            "notes": "fewer than 2 edges \u2014 no intervals to analyse"
+          },
+          "ch5": {
+            "channel": 5,
+            "n_edges": 1,
+            "n_intervals": 0,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": null,
+            "median_gap_ns": null,
+            "max_gap_ns": null,
+            "health": "ok",
+            "notes": "fewer than 2 edges \u2014 no intervals to analyse"
+          },
+          "ch6": {
+            "channel": 6,
+            "n_edges": 1,
+            "n_intervals": 0,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": null,
+            "median_gap_ns": null,
+            "max_gap_ns": null,
+            "health": "ok",
+            "notes": "fewer than 2 edges \u2014 no intervals to analyse"
+          },
+          "ch7": {
+            "channel": 7,
+            "n_edges": 1,
+            "n_intervals": 0,
+            "n_sub100ns": 0,
+            "pct_sub100ns": 0.0,
+            "min_gap_ns": null,
+            "median_gap_ns": null,
+            "max_gap_ns": null,
+            "health": "ok",
+            "notes": "fewer than 2 edges \u2014 no intervals to analyse"
+          }
+        },
+        "summary": {
+          "verdict": "OK \u2014 all 8 channel(s) clean",
+          "n_channels": 8,
+          "n_ok": 8,
+          "n_degraded": 0,
+          "n_suspect": 0,
+          "pct_sub100ns_overall": 0.0
+        }
+      }
+    },
+    {
+      "t": "2026-06-10T11:56:11+00:00",
+      "step_id": "ana_decode",
+      "type": "analysis",
+      "kind": "protocol_decode",
+      "params": {
+        "mode": "clock_edge",
+        "clock_channel": 0,
+        "data_channels": {
+          "0": 2,
+          "1": 3,
+          "2": 4,
+          "3": 5,
+          "4": 6,
+          "5": 7
+        },
+        "enable_channel": 1,
+        "enable_polarity": "high",
+        "signed": false
+      },
+      "result": {
+        "kind": "protocol_decode",
+        "events": [
+          {
+            "idx": 0,
+            "t_ns": 0,
+            "value": 63,
+            "binary": "111111",
+            "hex": "0x3F",
+            "decimal": 63,
+            "signed": -1
+          },
+          {
+            "idx": 1,
+            "t_ns": 5763684625,
+            "value": 63,
+            "binary": "111111",
+            "hex": "0x3F",
+            "decimal": 63,
+            "signed": -1
+          },
+          {
+            "idx": 2,
+            "t_ns": 7531171583,
+            "value": 63,
+            "binary": "111111",
+            "hex": "0x3F",
+            "decimal": 63,
+            "signed": -1
+          }
+        ],
+        "mode": "clock_edge",
+        "clock_channel": 0,
+        "data_channels": {
+          "0": 2,
+          "1": 3,
+          "2": 4,
+          "3": 5,
+          "4": 6,
+          "5": 7
+        },
+        "enable_channel": 1,
+        "n_events": 3,
+        "summary": {
+          "n_unique_values": 1,
+          "min": 63,
+          "max": 63,
+          "monotonic": true,
+          "duplicate_count": 2
+        }
+      }
+    },
+    {
+      "t": "2026-06-10T11:57:04+00:00",
+      "step_id": "obs",
+      "type": "note",
+      "operator_input": "IC1 on AD2 not sure if things are shorted here as there is very little room to have the connections on and the ribbon at the same time"
+    }
+  ],
+  "verdicts": [],
+  "sticky_state": {}
+}
